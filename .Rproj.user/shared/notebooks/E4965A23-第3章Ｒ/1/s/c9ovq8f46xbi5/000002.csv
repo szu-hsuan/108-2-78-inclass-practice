@@ -1,0 +1,14 @@
+"0","library(readr)"
+"0","exDataPost80s <- read_csv(""https://www.dropbox.com/s/rc6t40gsxduysz6/exDataPost80s.csv?dl=1"")"
+"2","Parsed with column specification:
+cols(
+  期間 = [34mcol_date(format = """")[39m,
+  幣別 = [31mcol_character()[39m,
+  匯率 = [32mcol_double()[39m,
+  貶值率 = [32mcol_double()[39m,
+  年份 = [32mcol_double()[39m,
+  時期 = [31mcol_character()[39m
+)
+"
+"0","View(exDataPost80s)"
+"0",""
