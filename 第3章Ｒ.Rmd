@@ -128,7 +128,20 @@ logi1 <- c(T,TRUE,F,FALSE,FALSE)
 sum(logi1)
 ```
 
+##3.5(20200325)
+```{r}
+c("aa","bb","c")
+c("1","25","77")
+c("小明今年歲數是",25) # "25"會是文字非數字
 
+```
+```{r}
+# 10位學生的主系
+majors10_char <- c('經濟學系','社會學系','社會學系','經濟學系','經濟學系','社會學系','經濟學系','經濟學系','經濟學系','社會學系')
+
+typeof(majors10_char)
+class(majors10_char)
+```
 
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
