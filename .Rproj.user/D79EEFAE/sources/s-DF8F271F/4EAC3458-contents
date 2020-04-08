@@ -268,7 +268,7 @@ course1_1082 <-
 ```
 
 # 今（“2020-03-31”）明（“2020-04-01”）「台北市」氣溫最高25度，最低18度；「新北市」氣溫最高24度，最低15度
-#undone
+#XX
 ```{r}
 temperature1 <- list(
   date= ymd("2020-03-31"),
@@ -281,6 +281,83 @@ temperature2 <- list(
   location = "NewTaipei",
   highest = "24",
   lowest = "15")
+```
+
+#answer
+```{r}
+#氣象預報
+weather_taipei<-
+  list(
+    date=list("2020-03-31",("2020-04-01")),
+    city="台北市",
+    temp_highest=25,
+    temp_lowest=18
+  )
+
+weather_newtaipei<-
+  list(
+    date=list(("2020-03-31"),("2020-04-01")),
+    city="新北市",
+    temp_highest=24,
+    temp_lowest=15
+  )
+weather<-list(weather_taipei,weather_newtaipei)
+print(weather)
+```
+
+詳解
+```{r}
+從底部開始架起
+`台北市預報元素值` <- 
+  list(
+    city="台北市",
+    high=25,
+    low=18
+  )
+`新北市預報元素值` <- 
+  list(
+    city="新北市",
+    high=24,
+    low=15
+  )
+
+`各地預報元素值` <-
+  list(
+    `台北市預報`=`台北市預報元素值`,
+    `新北市預報`=`新北市預報元素值`
+  )
+
+library(lubridate)
+`今明天氣` <-
+  list(
+    `今天日期`=ymd("2020-03-31"),
+    `明天天氣`=ymd("2020-04-01"),
+    `各地預報`=`各地預報元素值`
+  )
+```
+大家參考看看。
+如果資料結構太複雜，先畫個圖，然後從最底層寫上來。
+list產生後，在Environment點放大鏡看一下它的層層架構是否合理。
+
+```{r}
+#氣象預報
+weather_taipei<-
+  list(
+    date=list("2020-03-31","2020-04-01"),
+    city="台北市",
+    temp_highest=25,
+    temp_lowest=18
+  )
+
+weather_newtaipei<-
+  list(
+    date=list("2020-03-31","2020-04-01"),
+    city="新北市",
+    temp_highest=24,
+    temp_lowest=15
+  )
+weather<-list(weather_taipei,weather_newtaipei)
+print(weather)
 ```
 
  #一般天氣預報-今明36小時天氣預報:
@@ -298,6 +375,104 @@ save(commit,listExample,`小明108學年課表D`,file = "0401.Rda")
 ```{r}
 load("0401.Rda")
 ```
+
+#課後練習
+Ｑ1
+
+考大家個經學得如何。囚犯兩難賽局架構用list 記錄。
+只要能形容上面的局面就好，並不需要求解。
+以下是經濟學家對game的定義： A game involves three components:
+
+A list of players
+Moves each player can make (strategies)
+A listing of payoffs, or benefits, for each player on each eventual outcome (a utility function for outcomes)
+你們能不能表達出這個定義的list結構呢？
+
+Answer1
+```{r}
+Prisoners_dillemma=list(
+  players_of_the_game=list(
+    name1="A",
+    name2="B"),
+  each_players_strategy=list(
+    A=list(
+      strategy1="stay_silent",
+      strategy2="betray"),
+    B_strategy=list(
+      strategy1="stay_silent",
+      strategy2="betray")),
+  eventual_outcome=list(
+    `A:strategy1`=list(
+      `B:strategy1`=list(Aconsequence=c(-1),Bconsequence=c(-1)),
+      `B:strategy2`=list(Aconsequence=-3,Bconsequence=0)),
+    `A:strategy2`=list(
+      `B:strategy1`=list(Aconsequence=0,Bconsequence=-3),
+      `B:strategy2`=list(Aconsequence=-2,Bconsequence=-2))
+    )
+)
+
+Prisoners_dillemma$each_players_strategy$A$strategy1 # 查A的strategy1
+Prisoners_dillemma$each_players_strategy$A$strategy2
+Prisoners_dillemma$each_players_strategy$B$strategy1
+Prisoners_dillemma$each_players_strategy$B$strategy2
+
+Prisoners_dillemma$eventual_outcome$`A:strategy1`$`B:strategy2` # `A:strategy1`$`B:strategy2`下的payoff
+```
+模板
+```{r}
+game=list(
+  players=list(
+    player1="A",
+    player2="B"
+  ),
+  strategies=list(
+    player1=list(
+      strategy1="stay_silent",
+      strategy2="betray"
+    ),
+    player2=list(
+      strategy1="stay_silent",
+      strategy2="betray"
+    )
+  ),
+  `payoffs: (player1, player2)`=list(
+    # mapping from all possible player1 strategy vs player2 strategy
+    player1=list(
+      strategy1=list(
+        player2=list(
+          strategy1=c(-1,-1),
+          strategy2=c(-3,0)
+        )
+      ),
+      strategy2=list(
+        player2=list(
+          strategy1=c(0,-3),
+          strategy2=c(-2,-1)
+        )
+      )
+    )
+  )
+)
+
+# 查詢strategies
+game$strategies$player1$strategy1
+game$strategies$player2$strategy2
+
+# 查詢payoffs
+## player1:strategy1, player2:strategy2
+game$`payoffs: (player1, player2)`$player1$strategy1$player2$strategy2
+## player1:strategy2, player2:strategy2
+game$`payoffs: (player1, player2)`$player1$strategy2$player2$strategy2
+```
+
+Q2
+幾乎人的資訊都可以用list 保留。試看看： 小明於2020-04-01在他的臉書發了「是在哈囉」一文，他的好友在2020-04-02在該文按讚，同時分享到自己臉書
+這個資訊要怎麼留下來。
+如果大家可以把生活上的資訊都很自在的寫成list ，那以後你們一定會懂Google, Facebook的資訊。
+努力挑戰自己list化你一天的日記。
+
+emilyluckey @emilyluckey Apr 01 16:01
+一個例子讓大家思考~一樣是自我介紹的list，你會想怎麼分層?
 
 ## R Markdown
 
