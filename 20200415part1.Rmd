@@ -1,0 +1,236 @@
+---
+title: '20200415'
+author: "吳思璇"
+date: "4/15/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#4.1.3 連鎖選取
+```{r}
+numVector <- c(2,3,6,-1,4,2,6)
+select1 <- numVector[c(1,4)]; select1
+select2 <- select1[[1]]; select2
+
+# 相當於
+numVector[c(1,4)][[1]]
+```
+
+```{r}
+select1 <- numVector[c(T,T,F,T,F,F,T)]; select1
+select2 <- select1[c(1,4)]; select2
+
+# 相當於
+numVector[c(T,T,F,T,F,F,T)][c(1,4)]
+```
+
+##neetes list?
+```{r} 
+listExample <- 
+  list(
+    student="小明",
+    `學期`=list(
+      `108-1`=list(
+        list(
+          name="個體經濟學",
+          teacher="Alice",
+          grade=85
+        )
+      ),
+      `108-2`=list(
+        list(
+          name="總體經濟學",
+          teacher="Mark",
+          grade=78
+        )
+      )
+    )
+  )
+# 有多少位置可選：
+length(listExample)
+```
+
+```{r}
+str(listExample)
+```
+
+```{r}
+listExample[[1]]
+listExample[[2]]
+```
+用名字選
+```{r}
+get1 <- listExample[["學期"]]  #拿出來
+get1 <- listExample$`學期`     #拿出來
+
+
+get2 <- listExample["學期"] #留下來(結構仍保留)
+```
+
+```{r}
+get1 # 學期拿出來，有3個元素的list
+str(get1)
+```
+
+```{r}
+get2 # listExample 只留下 學期元素，是個只有一個元素的list
+str(get2)
+```
+
+
+```{r}
+majors <- c("經濟學系","經濟學系","社會學系","社工系","經濟學系")
+names <- c("小英", "小美", "大雄","阿華", "阿尼")
+gender <- c("F","F","M","F","M")
+```
+
+在前面討論使用$及[ ]取一個元素時我們創造了get1與get2兩個物件，請分別由get1, get2取出108-1學期個體經濟學教師姓名。
+##get1 取出
+```{r}
+get1$`108-1` -> get1_layer1; get1_layer1    #layer_1
+str(get1_layer1)
+```
+
+```{r}
+get1_layer1[[1]] -> get1_layer2; get1_layer2 
+                               # 只能用位置取，因為沒有名字 
+                               # layer_2
+str(get1_layer2)
+```
+
+```{r}
+get1_layer2$teacher
+```
+
+從get1取出
+```{r}
+get1 <- listExample[["學期"]]  #拿出來
+get1$`108-1` -> get1_layer1; get1_layer1     #layer_1
+get1_layer1[[1]] -> get1_layer2; get1_layer2 #layer_2
+get1_layer2$teacher
+get1$`108-1`[[1]]$teacher
+```
+
+```{r} 
+listExample[["學期"]]$`108-1`[[1]]$teacher # 也可以串在一起
+```
+
+從get2取出
+```{r}
+get2 <- listExample["學期"]
+get2_layer1 <- get2[[1]] #get2$`學期`; get2[["學期"]]
+get2_layer2 <- get2_layer2[["108-1"]]
+get2_layer3 <- get2_layer2[[1]]
+get2_layer3$teacher
+```
+
+```{r}
+listExample["學期"][[1]][["108-1"]][[2]]$teacher
+#也等於  But...
+listExample["學期"][["學期"]][["108-1"]][[2]]$teacher
+            白做工
+         （因為後面還是再取一次`[[]]`
+```
+#list應用
+atomic vector其實也可以像list對元素命名，然而用名稱取元素值在atomic vector：
+只能用`[ ]`or`[[ ]]`
+不能用＄；＄is usable for list only
+```{r}
+vector1 <- c(a=1,b=3,c=4)
+vector1[["a"]]
+vector1[c("a","c")]
+vector1$a # 不能用
+```
+
+```{r}
+list1 <- list(a=1,b=3,c=4)
+list1[["1"]]
+list1[c("a","c")]
+list1$a
+```
+
+```{r}
+today <- list(
+  list("台北市",c(highest_temp = 25),c(lowest_temp = 18)),
+  list("新北市",c(highest_temp = 24),c(lowest_temp = 15)))
+tomorrow <- list(
+  list("台北市",c(highest_temp = 25),c(lowest_temp = 18)),
+  list("新北市",c(highest_temp = 24),c(lowest_temp = 15)))
+
+weather <- list(today,tomorrow)
+
+print(weather)
+```
+
+```{r}
+today <- list( # atomic vector with name element但無法直接使用
+  list("台北市",c(highest_temp = 25),c(lowest_temp = 18)),
+  list("新北市",c(highest_temp = 24),c(lowest_temp = 15)))
+str(today)
+```
+```{r}
+taday[[1]][[2]]
+```
+
+
+```{r}
+tomorrow <- list(
+  list("台北市",c(highest_temp = 25),c(lowest_temp = 18)),
+  list("新北市",c(highest_temp = 24),c(lowest_temp = 15)))
+
+weather <- list(today,tomorrow)
+
+print(weather)
+```
+
+```{r}
+weather[[1]][[2]][[2]] # 今天/新北市/highest_temp
+weather[[2]][[2]][[2]] # 明天/新北市/highest_temp
+```
+
+Q1以下選法行得通嗎？
+如果不行，請把weather修改成可以那樣選。
+```{r}
+weather[[1]][[2]]$highest_temp # 今天/新北市/highest_temp
+weather[[2]][[2]]$highest_temp # 明天/新北市/highest_temp
+```
+
+Ans1
+```{r}
+today <- list(
+  list("台北市",
+       highest_temp=c(highest_temp = 25),
+       lowest_temp=c(lowest_temp = 18)),
+  list("新北市",
+       highest_temp=c(highest_temp = 24),
+       lowest_temp=c(lowest_temp = 15)))
+
+str(today)
+```
+```{r}
+today[[1]][[2]]
+# 也可以寫成
+today[[1]]$highest_temp  # 來自於list
+                  # 結果中的 highest_temp 來自於atomic vector
+```
+Q2 由之前“4.1.1.1用位置選”的list範例，選出小明108-1學期個體經濟學的老師
+## R Markdown
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
