@@ -1,0 +1,86 @@
+---
+title: "HW3 不會的"
+author: "吳思璇"
+date: "5/8/2020"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, eval=F)
+library(jsonlite); library(lubridate); library(readr); library(stringr)
+```
+
+# 題目
+
+## 1 新北市違法雇主
+以下資料來自[新北市違法雇主資料_勞動基準法](https://data.ntpc.gov.tw/od/detail?oid=A3408B16-7B28-4FA5-9834-D147AAE909BF)，執行後可得到badEmployers物件，其底下元素名稱說明可參考來源連結網頁：
+```{r data1}
+fromJSON("https://data.ntpc.gov.tw/od/data/api/CB6C96C8-D514-42EA-8591-0F4447E79C91?$format=json") -> badEmployers
+```
+
+
+### 1.1 違反法條種類
+針對law元素，列出裡面出現過的條款（不重覆陳列）存在violatedArticles (class character)：
+```{r ans11}
+unique(badEmployers$law) -> violatedArticles
+violatedArticles
+```
+
+### 1.2 各項法條違反者數目
+使用table()函數呈現出每個條款的違法廠商數目，存在table_countsByArticle (class table), 正確答案在執行names(table_countsByArticle)時會出現前一題的所有條款。
+```{r ans12}
+table(badEmployers$law) -> table_countsByArticle
+names(table_countsByArticle)
+table_countsByArticle
+```
+
+### 1.3 違反數最多的法條
+自1.2題的table_countsByAricle找出最多廠商違反的條款名稱及數目，即透過「要/不要」向量選出違反數最高的項目；結果存在mostViolatedArticle（class integer）。正確答案下，names(mostViolatedArticle)會呈現該條款，而as.integer(mostViolatedArticle)會呈現違法廠商數目。
+
+提示：table class物件為integer type，可對它取max()得到最大值。
+```{r ans13}
+max(table_countsByArticle) ->"勞動基準法第32條第2項"
+
+(badEmployers$law$"勞動基準法第32條第2項",max(table_countsByArticle) -> mostViolatedArticle
+
+names(mostViolatedArticle)
+as.integer(mostViolatedArticle)
+mostViolatedArticle
+```
+
+### 1.4 最常違反法條之內容
+找出最常違反條款的法條內容（可參見lawContent這個元素），並將此內容存在mostViolatedArticle_content (class character, length=1)
+```{r ans14}
+table(badEmployers$`lawContent`) ->g
+max(g)
+View(g)
+c("延長工作時間超過法令規定") ->mostViolatedArticle_content
+class(mostViolatedArticle_content)
+mostViolatedArticle_content
+```
+
+### 1.5 處份日期最常落在幾月
+找出處份日期最常出現的月份並存在popularSentenceMonth（class character, length=1）：
+```{r ans15}
+
+# popularSentenceMonth
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
