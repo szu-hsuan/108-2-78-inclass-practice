@@ -3,6 +3,8 @@ title: '20200513'
 author: "吳思璇"
 date: "5/14/2020"
 output: html_document
+editor_options: 
+  chunk_output_type: inline
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -10,17 +12,17 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ##4.7 On factor class
 
-內定levels順序是根據電腦內字元排序（collating sequence）依辭典序列方式決定排序，很多時候沒有意義。
+####內定levels順序是根據電腦內字元排序（collating sequence）依辭典序列方式決定排序，很多時候沒有意義。
 
-**排序像英文字典的順序**
+*排序像英文字典的順序*
 ```{r}
 char1 <- c("Wild","Apple","Donald","May","Avocada") 
 factor1 <- factor(char1)
 levels(factor1)
 ```
 
-*sort(f(x)) : 排序
-
+*sort(f(x)) : 排序*
+*str_sub(f(y)):Extract and replace substrings from a character vector*
 ```{r}
 library(stringr)
 char2 <- c("蔡英文","習近平","Donald Trump","蔡頭") 
@@ -34,19 +36,24 @@ sort(
 sort(
   str_sub(char2,2,2)
 )
+ ?str_sub()
 ```
 
-查詢你的collating sequence設定：
+####查詢你的collating sequence設定：
 ```{r}
 Sys.getlocale("LC_COLLATE")
 ```
 由於不同電腦、不同作業系統的collating sequence不同，如果levels順序在你的分析是重要的(不要讓電腦幫你決定），一定要在設定factor時自行設定好。
 
-嚴重特殊傳染性肺炎
+####嚴重特殊傳染性肺炎
 ```{r}
 jsonlite::fromJSON("https://od.cdc.gov.tw/eic/Day_Confirmation_Age_County_Gender_19CoV.json") -> covid19
 ```
 
+```{r}
+class(covid19$縣市)
+```
+##?
 ```{r}
 # 不可排序類別：性別、縣市、是否境外移入
 # 暫時歸類為類別資料（原本：邏輯）
@@ -99,12 +106,13 @@ levels放第二格時， levels= 可省略。(cauz 沒亂換位置)
 ```{r}
 levels(covid19$性別)
 covid19$性別 <- factor(covid19$性別, c("男","女"))
+covid19$性別
 ```
 
 ```{r}
 levels(covid19$縣市)
 
-covid19$縣市 <- factor(covid19$縣市,c("台北市","新北市",...))
+# covid19$縣市 <-  factor(covid19$縣市,c("台北市","新北市",...))
 # 自己更改排序
 ```
 But, 有時候不是依據自己的喜好排序
@@ -151,7 +159,8 @@ population[levelsInData] -> population
 
 3.將population由大排到小(sort(x, decreasing=T)可將x numeric vector由大排到小。)
 
-**decreasing=T：If miss this, the ranking will from small to big**
+**decreasing=T：from big to small**
+If miss this, the ranking will from small to big
 
 **population is a named vector **
 ```{r}
@@ -175,9 +184,17 @@ covid19$縣市 <-
 
 levels(covid19$縣市)
 ```
-
+#(not sure)
 ####HW
 將covid19$縣市 依縣市目前個案數目由大排到小。（hint: 可使用table()來得到個案數統計, 它會自然產生named integer vector）
+```{r}
+View(covid19)
+table(covid19$縣市)
+class(table(covid19$縣市))
+levels2 <- names(table(covid19$縣市))
+covid19$縣市 <- factor(covid19$縣市, levels = levels2)
+```
+
 
 ####年齡應該用年齡區間起始數字排序
 ```{r}
@@ -420,123 +437,7 @@ jsonlite::fromJSON("https://data.ntpc.gov.tw/od/data/api/EDC3AD26-8AE7-4916-A00B
 
 4.將garbageRoutes$time的levels中的“下午(1.4版)”改成“下午”。
 
-##4.8 On list
 
-資料來源：https://data.gov.tw/dataset/6015
-
-```{r}
-library(jsonlite)
-fromJSON("https://www.dropbox.com/s/6252gbdnv9owljm/dance.json?dl=1", simplifyDataFrame = F) -> dance
-```
-
-也可以直接從原始資料載點下載，然而載點資料會隨時更新而造成內容與講義示範有所出入：
-```{r}
-fromJSON("https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?method=doFindTypeJ&category=3", simplifyDataFrame = F) -> dance
-```
-
-####活動名稱
-```{r}
-# 前三筆演出的名稱
-dance[[1]]$title
-dance[[2]]$title
-dance[[3]]$title 
-```
-
-**若要針對向量或list裡的每個元素進行相同操作，purrr是相當方便的工具，最常用的是：**
-```{r}
-map(向量或list, 每個元素要做的事)
-```
-
-```{r}
-library(purrr)
-map(dance,~.x$title) -> dance_title
-```
-
-####活動場次資訊
-```{r}
-dance[[1]]$showInfo
-length(dance[[1]]$showInfo)
-
-dance[[2]]$showInfo
-length(dance[[1]]$showInfo)
-```
-
-```{r}
-length(dance[[1]]$showInfo)
-length(dance[[2]]$showInfo)
-# :
-length(dance[[34]]$showInfo)
-```
-
-####Q
-```{r}
-map(dance,~length(.x$showInfo)) -> dance_showInfoLength
-```
-
-1.選出每個活動的「活動起始日期」。
-2.選出每個活動的「活動名稱」及「活動起始日期」。
-3.選出每個活動showInfo下的每場次之「單場次演出時間」及「場地名稱」。（只用到map, 及~。）此題有點難，考驗同學map的活用能力。 答案應符合的str:
-前兩個元素應有的str:   
-List of 34  
- $ :List of 1  # 第一個元素  
-  ..$ :List of 2  
-  .. ..$ time        : chr   
-  .. ..$ locationName: chr   
- $ :List of 3  # 第二個元素  
-  ..$ :List of 2  
-  .. ..$ time        : chr   
-  .. ..$ locationName: chr  
-  ..$ :List of 2  
-  .. ..$ time        : chr   
-  .. ..$ locationName: chr   
-  ..$ :List of 2  
-  .. ..$ time        : chr   
-  .. ..$ locationName: chr   
-:  
-:
-
-####新北市公車路線清單
-```{r}
-jsonlite::fromJSON("https://data.ntpc.gov.tw/od/data/api/67BB3C2B-E7D1-43A7-B872-61B2F082E11B?$format=json", simplifyDataFrame = F) ->
-  busRoutes
-```
-找出Id(路線代碼)、providerId(業者代碼)、providerName(業者中文名稱)、nameZh(中文名稱)。
-
-##as.list/as.data.frame
-
-*data.frame是list底下所有元素若為向量，其length均相同的一個特殊結構。
-*as.list(), as.data.frame()
-
-```{r}
-char <- c("A","A","C","B","C","D")
-table(char) -> tb_char
-as.list(tb_char) -> list_tb_char
-as.data.frame(tb_char) -> dataFrame_tb_char
-```
-
-```{r}
-vector1 <- c(T,F,F,T,T)
-names(vector1) <- c('Mary','John','Bruce','Jack', 'Jane')
-vector1
-
-as.list(vector1) -> list_vector1
-as.data.frame(vector1) -> dataFrame_vector1
-```
-
-##4.9 綜合練習
-
-####人力資源調查非勞動力之未參與勞動原因
-```{r}
-jsonlite::fromJSON("https://www.dropbox.com/s/ck7pc59tkf568xq/discouragedWorkers.json?dl=1") -> discouragedWorkers
-```
-
-項目別_Iterm 裡沒有M的資料選出來後可以形成年資料，當中“想工作而未找工作且隨時可以開始工作”的人稱之為「怯志工作者」。請問在年資料裡哪一年的怯志工作者佔總數比例最高。
-
-####5 台北大學正門的座標是 121.373323, 24.945398。算出它與垃圾車經過所有點（由longitude及latitude）的直線經緯座標距離存在distance新物件。
-
-利用min()函數求得distance裡元素值的最小值，及產生：distance為最小值的「要/不要」向量pick_minDistance。
-
-如果你要在台北大學正門等垃圾車，最晚不得晚於何時？(只「要」distance為最小值下，自garbageRoutes的time取出元素值。)
 
 ## R Markdown
 
