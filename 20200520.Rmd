@@ -149,7 +149,7 @@ length(dance[[2]]$showInfo)
 ```
 
 
-對 `dance` 每個元素進行
+##對 `dance` 每個元素進行
 
 `length(.x$showInfo)`的動作
 

@@ -139,7 +139,7 @@ example裡誰的身高大於等於170
 ```{r}
 example$name[c(T, F, T, F)] # but no efficiency
 ```
-##?
+##
 ```{r}
 str(example[c("name","height")])
 
@@ -336,8 +336,13 @@ print(levels_ages)
 將levels順序改成: 不詳，總計，0_5歲，12_17歲，…，70歲以上。
 ```{r}
 levels_new <- c(levels_ages[c(12,13,1,8,2:7,9:11)])
-levels(list_victimAges_female$年齡層) <- levels_new
 ```
+
+```{r}
+levels(list_victimAges_female$年齡層) <- levels_new #回存
+levels_new
+```
+
 
 情境
 ```{r}
@@ -362,8 +367,8 @@ sum(list_victimAges_female$數目[pick_above30], na.rm = T)
 ```
 
 ##4.4.2 相等，屬於（用於“判斷”）
-`==`: 等於
-`!=`: 不等於
+####`==`: 等於
+####`!=`: 不等於
 `==`與`!=`可使用於字串
 
 *`=`: 等於`<-`，指定元素值用 
@@ -376,17 +381,18 @@ pick_bloodB <- example$bloodType == "B"
 example$name[pick_bloodB]
 ```
 
-＊相同class才能做關聯比較
+*相同class才能做關聯比較*
+創造可留下偶數的「要/不要」向量pick_evens。
 ```{r}
 sequenceNums <- c(11, 6, 8, 11, 12, 11, 3, 7, 10, 8)
 
 pick_evens <- (sequenceNums %% 2) == 0
 sequenceNums[pick_evens]
 ```
-創造可留下偶數的「要/不要」向量pick_evens。
+
 
 還有一個常用的關聯運算：
-`%in%`: 屬於
+####`%in%`: 屬於
 左邊元素「一一」檢視是不是屬於右邊元素集合。
 用於多種可能的情況。
 ```{r}
@@ -419,15 +425,15 @@ str(transcript100to103)
 先檢查名稱
 ```{r}
 levels(factor(transcript100to103$學院))
-
+?factor
 unique(transcript100to103$學院) 
 # unique(f(a)): 重複的只顯示一筆
 ```
 ##???
 ```{r}
 set_LawBusiness <- c("法學院","商學院")
-pick_LawBusiness <- transcript100to103$`學院` %in% set_LawBusiness
-transcript100to103$`學院`[set_LawBusiness]  # ?
+pick_LawBusiness <- transcript100to103$學院 %in% set_LawBusiness
+transcript100to103$學院[pick_LawBusiness]  # ?
 ```
 
 ##4.4.3 Negation(否定用法)
@@ -461,16 +467,16 @@ x3 <- c(NA,"小花")
 y3 <- c(NA,"小華")
 ```
 
-前述的關係判斷遇到NA時，結果都會是NA——即無法判斷。要知道向量內各元素值是否NA，可使用is.na():
+####前述的關係判斷遇到NA時，結果都會是NA——即無法判斷。要知道向量內各元素值是否NA，可使用is.na():
 ```{r}
 x2
 is.na(x2)
 ```
 
-缺失資料的判斷一定要用is.na不能用==NA來判斷：
+*缺失資料的判斷一定要用is.na不能用==NA來判斷：*
 ```{r}
 c(22,NA,18) -> a
-a==NA
+a == NA
 is.na(a)
 ```
 
@@ -500,6 +506,7 @@ list_victimAges_female$數目 <- as.integer(list_victimAges_female$數目)
 ####創立 可選出缺失資料的「要/不要」向量pick_na, 並計算有多少筆缺失。
 看一下資料
 ```{r}
+?head()
 head(list_victimAges_female$數目)
 ```
 
@@ -545,8 +552,8 @@ print(example[c("name", "hobby2")])
 pick_loveFood2 <- example$hobby2 == "美食"
 example$name[pick_loveFood2]
 ```
-＊`==` 字串內容一模一樣。
-*`str_detect` 字串內容有關鍵字。
+####`==` 字串內容一模一樣。
+####`str_detect` 字串內容有關鍵字。
 
 ####以下資料為新北市垃圾車路線
 ```{r}
@@ -579,8 +586,8 @@ class : data.frame
 class(garbageRoutes$linename)
 ```
 
-＊`factor` 是用數字在存
-＊`stringr::str_detect` ：用print 在screen上的樣子在偵測
+####`factor` 是用數字在存
+####`stringr::str_detect` ：用print 在screen上的樣子在偵測
 ```{r}
 # 由linename元素判斷垃圾車有幾條路線。
 factor(garbageRoutes$linename) -> garbageRoutes$linename

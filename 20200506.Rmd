@@ -25,8 +25,8 @@ example <- list(
 ```
 邏輯向量間（即「要/不要」向量）的操作主要是以下幾個：
 
-`&`: AND
-`|`: OR 
+####`&`: AND
+####`|`: OR 
 
 ```{r}
 str(example)
@@ -146,11 +146,11 @@ str_extract(
 ) # 回傳vector 
 ```
 
-##4.6.2 組合alternate
+##??!!4.6.2 組合alternate
 
 用來製做一台吃角子老虎，它能夠包含你要的所有可能target出象。吃角子老虎由數條reel strip組成，每一條strip可以有以下幾種設計
 
-固定字元/組：單寫一個字組或字元，表示那個strip固定不動只有一個出象，例如：2表示只有“2”一個出象，櫻桃只有“櫻桃”一個出象。
+####固定字元/組：單寫一個字組或字元，表示那個strip固定不動只有一個出象，例如：2表示只有“2”一個出象，櫻桃只有“櫻桃”一個出象。
 
 ```{r}
 install.packages("htmlwidgets")
@@ -165,7 +165,7 @@ str_count(heartSutra,"色") # 計數
 str_view_all(heartSutra,"異色")
 ```
 
-＊＊字「群」組合(..|..|..): strip上的出象會出現一組字時用，如“AB|ab”/ `(AB|ab)`, 可以產生“AB”或“ab”兩種出象。
+####字「群」組合(..|..|..): strip上的出象會出現一組字時用，如“AB|ab”/ `(AB|ab)`, 可以產生“AB”或“ab”兩種出象。
 
 字群組合規則若很單純前後沒有接其他描述則`( )`可不寫
 
@@ -191,7 +191,7 @@ str_view_all(studentIds, "107|108") # 前後沒東西的情況，可不寫()
 str_detect(studentIds, "107|108")
 ```
 
-*字「元」組合`[]`: strip上的出象「均」是一個字「元」時用，如`[af78]`可以產生“a”,“f”,“7”,“8”四種字元出象。
+####字「元」組合`[]`: strip上的出象「均」是一個字「元」時用，如`[af78]`可以產生“a”,“f”,“7”,“8”四種字元出象。
 幾種常見的字元模版：`[0-9]`(或`[:digit:]`)，`[a-z]`(或`[:lower:]`)，`[A-Z]`(或`[:upper:]`),`[0-9a-zA-Z]`(或`[:alnum:]`)
 參考 stringr.pdf
 
@@ -205,7 +205,7 @@ str_detect(Ids, "[AC]") # 偵測 出現A、C
 str_extract(Ids,"[A-Z]") # 取出 A-Z的字元
 ```
 
-*將設定好的reel strips依你要的順序排好就是你的regex slot machine, 它可以用來驗證字串裡頭是否出現來自你regex slot machine的某些組合。
+####將設定好的reel strips依你要的順序排好就是你的regex slot machine, 它可以用來驗證字串裡頭是否出現來自你regex slot machine的某些組合。
 ```{r}
 strip1 <- "[0-9]" #字元
 strip2 <- "(櫻桃|777|紅心)" 
@@ -234,7 +234,7 @@ str_detect(
 )
 ```
 
-以否定法定義的字「元」組合`[^ ]`: “`[^趙錢孫李]`”不能有趙錢孫李任何一個
+####以否定法定義的字「元」組合`[^ ]`: “`[^趙錢孫李]`”不能有趙錢孫李任何一個
 範例
 ```{r}
 headline <- "資科系的謝陳官乃飛鳶書院三大名師，其中謝無雙的策略運算，陳大器的數理資科學，及官求敗的運算成本更是打通演算思維任督二脈的三大好課。書院目前有陳一、陳二、陳三四這三名學生。"
@@ -341,7 +341,7 @@ target前有A後有B：(?<=A_regex)target_regex(?=B_regex)
 
 **Cheat sheet上還有更多字串處理情境。**
 
-民國年月日存成date class：
+####民國年月日存成date class：
 ```{r}
 twDate <-  c("民國108年12月5日","民國98年10月5日")
 
@@ -387,15 +387,28 @@ lubridate::ymd(twDate_reformat)
 dateFinal <- lubridate::ymd(twDate_reformat)
 class(dateFinal)
 ```
-##?
-康熙元年是西元1662年，請將“康熙23年5月6日”轉成date class。（假設月日已是西曆月日）
+
+####康熙元年是西元1662年，請將“康熙23年5月6日”轉成date class。（假設月日已是西曆月日）
 農曆怎麼做？？
 ```{r}
-
+date1 <- "康熙23年5月6日"
+regex_pattern1 <- "(?<=康熙)[0-9]+(?=年)"
+year <- str_extract(
+  date1, regex_pattern1
+  )
+westernYear1 <- as.integer(year) + 1661
+date_reform <-
+  str_replace(
+    date1,
+    regex_pattern1,
+    as.character(westernYear1)
+  )
+datefinal <- lubridate::ymd(date_reform)
+class(datefinal)
 ```
 
 
-之前我們使用str_extract函數粹取出以下地址的“xx號”包含“號”字，如果不要取到「號」字只取出數字，你會怎麼做？
+####之前我們使用str_extract函數粹取出以下地址的“xx號”包含“號”字，如果不要取到「號」字只取出數字，你會怎麼做？
 把“號”當鄰居
 ```{r}
 addresses <- c(

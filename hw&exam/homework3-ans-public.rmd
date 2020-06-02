@@ -31,9 +31,12 @@ library(jsonlite); library(lubridate); library(readr); library(stringr)
 ## 1 新北市違法雇主
 以下資料來自[新北市違法雇主資料_勞動基準法](https://data.ntpc.gov.tw/od/detail?oid=A3408B16-7B28-4FA5-9834-D147AAE909BF)，執行後可得到badEmployers物件，其底下元素名稱說明可參考來源連結網頁：
 ```{r data1}
-fromJSON("https://data.ntpc.gov.tw/od/data/api/CB6C96C8-D514-42EA-8591-0F4447E79C91?$format=json") -> badEmployers
+jsonlite::fromJSON("https://data.ntpc.gov.tw/api/datasets/A3408B16-7B28-4FA5-9834-D147AAE909BF/json") -> badEmployers
 ```
 
+```{r}
+View(badEmployers)
+```
 
 ### 1.1 違反法條種類
 針對law元素，列出裡面出現過的條款（不重覆陳列）存在violatedArticles (class character)：

@@ -121,22 +121,23 @@ listExample[["學期"]]$`108-1`[[1]]$teacher # 也可以串在一起
 ```{r}
 get2 <- listExample["學期"]
 get2_layer1 <- get2[[1]] #get2$`學期`; get2[["學期"]]
-get2_layer2 <- get2_layer2[["108-1"]]
+get2_layer2 <- get2_layer1[["108-1"]]
 get2_layer3 <- get2_layer2[[1]]
 get2_layer3$teacher
 ```
 
 ```{r}
-listExample["學期"][[1]][["108-1"]][[2]]$teacher
+listExample["學期"][[1]][["108-1"]][[1]]$teacher
 #也等於  But...
-listExample["學期"][["學期"]][["108-1"]][[2]]$teacher
-            白做工
-         （因為後面還是再取一次`[[]]`
+listExample["學期"][["學期"]][["108-1"]][[1]]$teacher
+            #白做工
+         #（因為後面還是再取一次`[[]]`
 ```
+
 #list應用
 atomic vector其實也可以像list對元素命名，然而用名稱取元素值在atomic vector：
-只能用`[ ]`or`[[ ]]`
-不能用＄；＄is usable for list only
+##*只能用`[ ]`or`[[ ]]`*
+##*不能用＄；＄is usable for list only*
 ```{r}
 vector1 <- c(a=1,b=3,c=4)
 vector1[["a"]]
@@ -146,7 +147,7 @@ vector1$a # 不能用
 
 ```{r}
 list1 <- list(a=1,b=3,c=4)
-list1[["1"]]
+list1[["a"]]
 list1[c("a","c")]
 list1$a
 ```
@@ -171,11 +172,14 @@ today <- list( # atomic vector with name element但無法直接使用
 str(today)
 ```
 ```{r}
-taday[[1]][[2]]
+today[[1]][[2]]
 ```
 
 
 ```{r}
+today <- list(
+  list("台北市",c(highest_temp = 25),c(lowest_temp = 18)),
+  list("新北市",c(highest_temp = 24),c(lowest_temp = 15)))
 tomorrow <- list(
   list("台北市",c(highest_temp = 25),c(lowest_temp = 18)),
   list("新北市",c(highest_temp = 24),c(lowest_temp = 15)))
@@ -197,9 +201,22 @@ weather[[1]][[2]]$highest_temp # 今天/新北市/highest_temp
 weather[[2]][[2]]$highest_temp # 明天/新北市/highest_temp
 ```
 
-Ans1
 ```{r}
 today <- list(
+  list("台北市",c(highest_temp = 25),c(lowest_temp = 18)),
+  list("新北市",c(highest_temp = 24),c(lowest_temp = 15)))
+tomorrow <- list(
+  list("台北市",c(highest_temp = 25),c(lowest_temp = 18)),
+  list("新北市",c(highest_temp = 24),c(lowest_temp = 15)))
+
+weather <- list(today,tomorrow)
+
+print(weather)
+```
+
+Ans1
+```{r}
+todaya <- list(
   list("台北市",
        highest_temp=c(highest_temp = 25),
        lowest_temp=c(lowest_temp = 18)),
@@ -207,24 +224,26 @@ today <- list(
        highest_temp=c(highest_temp = 24),
        lowest_temp=c(lowest_temp = 15)))
 
-str(today)
+str(todaya)
 ```
+
 ```{r}
-today[[1]][[2]]
+todaya[[1]][[2]]
 # 也可以寫成
-today[[1]]$highest_temp  # 來自於list
+todaya[[1]]$highest_temp  # 來自於list
                   # 結果中的 highest_temp 來自於atomic vector
 ```
 Q2 由之前“4.1.1.1用位置選”的list範例，選出小明108-1學期個體經濟學的老師
 
 ##4.2 新增/替換/刪除元素
-元素提取[.],[[.]],$.也可用來進行元素「值」的修改與新增, 使用方法為：
+元素提取`[.]`,`[[.]]`,`$`.也可用來進行元素「值」的修改與新增, 使用方法為：
 obj[.] <- value
 obj[[.]] <- value
 obj$. <- value
-若.所指定的元素不存在，則為「新增」。
 
+若.所指定的元素不存在，則為「新增」。
 若.所指定的元素存在，則為「修改」。
+
 ```{r}
 a <- c("1","b","TRUE")
 a
@@ -285,12 +304,9 @@ str(list1)
 ```
 
 使用[.] <-
-
 由於[.]會保留母層結構，所以<-右側要使用和母層相同的型態設定：
-
-母層若為list，則需用list(...)方式增加。
-
-母層若為atomic vector，則用c(...)方式增加。
+##*母層若為list，則需用list(...)方式增加。*
+##*母層若為atomic vector，則用c(...)方式增加。*
 ```{r}
 list1[[1]][["age"]] <- 21
 list1[[2]]["age"] <- list(21)
@@ -350,10 +366,10 @@ listExample$學期$`108-1`[[2]][c("teacher","grade")] <-
 str(listExample)
 ```
 
-刪除可以使用[- c(數字位置)] # 刪掉
+##刪除可以使用[- c(數字位置)] # 刪掉
 
-只能「一個」中括號（[[.]]不能接受負數值）
-只能用負數值，不能用元素名稱。
+*只能「一個」中括號（[[.]]不能接受負數值）*
+*只能用負數值，不能用元素名稱。*
 ```{r}
 print(a)
 a[-c(1,3)]
@@ -394,7 +410,7 @@ str(list1)
 list1[[2]][-c(4,5)] -> list1[[2]]
 ```
 
-#list元素要刪除時也可以用[.]<-NULL, [[.]]<-NULL, $.<-NULL
+##list元素要刪除時也可以用[.]<-NULL, [[.]]<-NULL, $.<-NULL
 ```{r}
 str(list1)
 list1[[2]][c(1,2)] <- NULL

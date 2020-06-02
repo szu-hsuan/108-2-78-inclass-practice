@@ -4,15 +4,18 @@ author: "吳思璇"
 date: "4/13/2020"
 output: html_document
 ---
+##第 4 章 Operation on vector and list
+
 ##選取元素4.1
-###「選一個元素」
-####用位置選`[[.]]`｛chooseByPosition}
+###4.1.1 選「一個元素」
+####4.1.1.1用位置選`[[.]]`｛chooseByPosition}
 ```{r}
 vectorExample <- c("小明","小英","大雄")
 
 # 有多少位置可選：
 length(vectorExample)
 ```
+
 ```{r}
 vectorExample[[1]]
 vectorExample[[3]]
@@ -50,16 +53,16 @@ listExample[[2]]
 
 ```{r}
 library(jsonlite)
-fromJSON("https://data.tainan.gov.tw/dataset/4cd9345a-04bf-4328-a97d-314ff78b4763/resource/afc025fc-1ef4-447c-b785-a680391d0ca1/download/tnsport2.json", simplifyDataFrame = F) -> tainanSportsMap
+fromJSON("http://210.69.40.35/api/api/agriculture", simplifyDataFrame = F) -> tainanAgriculture
 
-length(tainanSportsMap)
+length(tainanAgriculture)
 ```
 ```{r}
-tainanSportsMap[[1]]
-tainanSportsMap[[1076]]
+tainanAgriculture[[1]]
+tainanAgriculture[[1000]]
 ```
 
-####4.1.1.2 用名字選`$.`{-}
+####4.1.1.2 用名字選`$`/ $`x`
 
 ```{r}
  # 有多少名字可以選
@@ -79,7 +82,7 @@ str(listExample)  #structure
 str(listExample$學期)
 ```
 
-其實也可以用[["名字"]]來選，只是名字要以字串「值」的方式來寫，也就是要用引號一對"…", 不用反頓點一對`…`。
+其實也可以用`[["名字"]]`來選，只是名字要以字串「值」的方式來寫，也就是要用引號一對"…", 不用反頓點一對`…`。
 ```{r}
 listExample[["student"]]
 listExample$student
@@ -91,6 +94,7 @@ listExample$`學期`
 ```{r}
 listExample[[student]] #globalEnverionment 沒有這個物件
 ```
+
 ```{r}
 student <- "student"
 listExample[[student]]
@@ -107,6 +111,7 @@ str(newTaipeiCityVaccine)
 length(newTaipeiCityVaccine)
 names(newTaipeiCityVaccine)
 ```
+
 ```{r}
 str(newTaipeiCityVaccine[[1]])
 str(newTaipeiCityVaccine$success)
@@ -127,6 +132,20 @@ str(newTaipeiCityVaccine[["result"]],max.level = 1)
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+##4.1.2 選「多個元素」
+
+####4.1.2.1 用位置選[c(...)]
+```{r}
+vectorExample
+vectorExample[c(1,3)]
+```
+
+```{r}
+# 顯示到第一層
+str(listExample, max.level=1)
+
+listExample[c(1,2)]
+```
 
 ####4.1.2.2 用名字選[c("name1","name2",...)]
 
@@ -135,7 +154,7 @@ knitr::opts_chunk$set(echo = TRUE)
 str(listExample, max.level=1)
 
 listExample[c("學期")] # 不建議
-listExample[[c("學期")]] or 
+listExample[[c("學期")]] #or 
 listExample[["學期"]]
 listExample[c("student","學期")]
 listExample[c("學期","student")]
@@ -190,24 +209,34 @@ str(taipeiNightMarkets[
   T,F,F,
   F,T)] ,max.level =1)
 ```
+
 ```{r}
 selectedMarkets <- rep(F,14) # repeat F by 14 times
 print(selectedMarkets)
 selectedMarkets[c(1,5,10,14)] <- TRUE #replacement(R:generic)
 print(selectedMarkets)
 ```
+
 ```{r}
 str(taipeiNightMarkets[selectedMarkets],max.level = 1)
 ```
+
 ```{r}
 str(listExample,max.level = 3)
 ```
+
 ```{r}
-listExample: length=2, list class
-  |
-  |--student: length=1, character class
-  |
-  |--學期: length=3, list class
+#listExample: length=2, list class
+#  |
+#  |--student: length=1, character class
+#  |
+#  |--學期: length=3, list class
+```
+
+```{r}
+length(listExample$學期)
+str(listExample[[2]],max.level = 3)
+str(listExample["學期"],max.level = 3)
 ```
 
 以下兩個表面都是選取“學期”:
@@ -215,26 +244,28 @@ listExample: length=2, list class
 get1 <- listExample[["學期"]]
 get2 <- listExample["學期"]
 ```
- #[[]]: 拿出某個物件值。listExample[["學期"]]將listExample裡的“學期”物件值拿出來。
+ *[[]]: 拿出某個物件值。listExample[["學期"]]將listExample裡的“學期”物件值拿出來。*
 ```{r}
- get1 # 學期拿出來，有3個元素的list
+get1 # 學期拿出來，有3個元素的list
 str(listExample,max.level = 3)
 ```
 
 ```{r}
 get1 <- listExample[["學期"]]
 str(get1,max.level = 1)
+str(get1,max.level = 2)
 ```
-[]: 留下某個物件值。listExample["學期"]「只留下」listExample裡的“學期”物件值。
+*[]: 留下某個物件值。listExample["學期"]「只留下」listExample裡的“學期”物件值。*
 #??!!
 ```{r} 
  #get1 # 學期拿出來，有3個元素的list
 str(listExample,max.level = 3)
 ```
+
 ```{r}
 get2 <- listExample["學期"] # listExample 只留下 學期元素，是個＃只有一個元素的list
 str(get2,max.level = 1)
-str(get2,max.level = 2)
+str(get2,max.level = 3)
 ```
 
 ```{r}
@@ -242,7 +273,7 @@ str(listExample,max.level = 3)
 ```
 
 ```{r}
-str(get1,max.level = 1) ＃ [[]]:拿出來
+str(get1,max.level = 1) # [[]]:拿出來
 ```
 
 ```{r} 
@@ -278,6 +309,16 @@ names <- c("小英", "小美", "大雄","阿華", "阿尼")
 gender <- c("F","F","M","F","M")
 ```
 在前面討論使用[[ ]]（同$）及[ ]取一個元素時我們創造了get1與get2兩個物件，請分別由get1, get2取出108-1學期個體經濟學教師姓名。
+```{r}
+get1
+get1$`108-1`[[1]][[2]]
+```
+
+```{r}
+get2
+get2$學期$`108-1`[[1]][2]
+```
+
 ## R Markdown
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.

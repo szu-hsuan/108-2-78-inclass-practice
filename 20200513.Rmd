@@ -134,7 +134,7 @@ unlist(population) -> population
 print(population)
 ```
 
-資料科學心法一：拿到新的資料先檢視「內容」、「class/type」
+####資料科學心法一：拿到新的資料先檢視「內容」、「class/type」
 **integer class: 那中文是哪來的？ 元素有取名的向量，用`names(f(x))`看
 ##?
 ```{r}
@@ -184,15 +184,29 @@ covid19$縣市 <-
 
 levels(covid19$縣市)
 ```
-#(not sure)
 ####HW
+```{r}
+jsonlite::fromJSON("https://od.cdc.gov.tw/eic/Day_Confirmation_Age_County_Gender_19CoV.json") -> covid19
+View(covid19)
+```
+
 將covid19$縣市 依縣市目前個案數目由大排到小。（hint: 可使用table()來得到個案數統計, 它會自然產生named integer vector）
 ```{r}
-View(covid19)
+#false
+#少了sort
 table(covid19$縣市)
 class(table(covid19$縣市))
 levels2 <- names(table(covid19$縣市))
 covid19$縣市 <- factor(covid19$縣市, levels = levels2)
+levels(covid19$縣市)
+```
+
+```{r}
+table(covid19$縣市) -> sick_number
+sort(sick_number , decreasing = T) ->sick_number
+names(sick_number) -> SickLevels
+covid19$縣市 <- factor(covid19$縣市 , levels = SickLevels)
+levels(covid19$縣市)
 ```
 
 
@@ -336,7 +350,7 @@ covid19$地區
 ```
 
 
-####將covid19$年齡層，由5歲間距成10歲間距，使改完後的levels為4 < 5-14 < 15-24 < …< 55-64 < 65+
+####??!!將covid19$年齡層，由5歲間距成10歲間距，使改完後的levels為4 < 5-14 < 15-24 < …< 55-64 < 65+
 ```{r}
 levels(covid19$年齡層)
 
@@ -348,7 +362,8 @@ middleLevels <-
   rep(
     paste0(start,"-",end),  # can't levels directly
     each=2) # 每個新間距要2個 
-# rep(x,each=2)
+#rep(x,each=2)
+?rep
 newLevels <- c("4", middleLevels, "65+", "65+")
 
 levels(covid19$年齡層) <- newLevels
@@ -390,7 +405,7 @@ factor2[[7]] <- "尚可"
 factor2
 ```
 
-**factor無法用c(...)把兩個factor vector串接在一起：**
+##*factor無法用c(...)把兩個factor vector串接在一起：*
 ```{r}
 # non factor
 char1 <- c("小明","小美")
@@ -423,6 +438,12 @@ forcats::fct_c(factor1, factor2)
 ##4.7.5 綜合練習
 
 ####Q1 將covid19$性別的levels名稱男、女改Male、Female。
+```{r}
+a <- factor(covid19$性別)
+levels(a) <- c("male","female")
+levels(a)
+```
+
 
 ####Q2 以下資料為新北市垃圾車路線
 ```{r}
@@ -431,12 +452,48 @@ jsonlite::fromJSON("https://data.ntpc.gov.tw/od/data/api/EDC3AD26-8AE7-4916-A00B
 ```
 1.在garbageRoutes新增route元素，其元素值為對應garbageRoutes$linename裡粹取出的“XXX路線”字眼，如原本“A11路線(一、四)下午”的linename, 它的route值為“A11路線” 。（garbageRoutes$route為factor class)
 
+```{r}
+garbageRoutes$route<-factor(
+str_extract(garbageRoutes$linename,"[:alnum:]+路線"))
+```
+
 2.請設定garbageRoutes$route的levels依其路線停靠總站數由小排到大陳列。
+```{r}
+newlevels<-names(sort(table(garbageRoutes$route)))
+levels(garbageRoutes$route)<-newlevels
+```
 
 3.linename的“路線”字眼後面接的是營運時間，如“A11路線(一、四)下午”的linename, 它的營運時間為“(一、四)下午”。若沒寫時間的路線，它的營運時間為“全天”。請在garbageRoutes新增time元素，其元素值為對應linename所隱含的營運時間。（garbageRoutes$time為factor class, levels會有“(一、四)下午”, “下午”, “下午(1.4版)”, “晚上”, 及“全天”）
+```{r}
+garbageRoutes$time<-
+  str_extract(garbageRoutes$linename,"(?<=線)[:graph:]+")
+garbageRoutes$time[is.na(garbageRoutes$time)]<-"全天"
+garbageRoutes$time<-factor(garbageRoutes$time)
+```
 
 4.將garbageRoutes$time的levels中的“下午(1.4版)”改成“下午”。
+```{r}
+levels(garbageRoutes$time)[[3]]<-"下午"
+```
 
+
+```{r}
+sonlite::fromJSON("https://data.ntpc.gov.tw/od/data/api/EDC3AD26-8AE7-4916-A00B-BC6048D19BF8?$format=json") ->
+  garbageRoutes
+
+garbageRoutes$route<-factor(
+str_extract(garbageRoutes$linename,"[:alnum:]+路線"))
+
+newlevels<-names(sort(table(garbageRoutes$route)))
+levels(garbageRoutes$route)<-newlevels
+
+garbageRoutes$time<-
+  str_extract(garbageRoutes$linename,"(?<=線)[:graph:]+")
+garbageRoutes$time[is.na(garbageRoutes$time)]<-"全天"
+garbageRoutes$time<-factor(garbageRoutes$time)                  
+
+levels(garbageRoutes$time)[[3]]<-"下午"
+```
 
 
 ## R Markdown
