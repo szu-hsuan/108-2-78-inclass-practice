@@ -1,0 +1,192 @@
+---
+title: '20200603'
+author: "吳思璇"
+date: "6/3/2020"
+output: html_document
+---
+##5.2 Function
+用來執行一連串有固定SOP（流程）的動作
+
+##5.2.1 需求函數
+qd=10−5p
+
+```{r}
+# p=1.2的需求量
+p=1.2
+qd <- 10-5*p # 小心是5*p, 不能寫5p
+# p=1.3的需求量
+p=1.3
+qd <- 10-5*p
+# p=1.4的需求量
+p=1.4
+qd <- 10-5*p
+```
+
+會變動的步驟：
+p=1.2, p=1.3, p=1.4
+
+不會變動的步驟：
+qd <- 10-5*p
+
+###函數定義
+```{r}
+demand <- # 創造一個物件叫demand
+  function(p){ # 定義這個物件為函數
+    q_d <- 10-5*p # 小心是5*p, 不能寫5p
+  }
+```
+
+```{r}
+# p=1.2的需求量
+demand(1.2) 
+# p=1.3的需求量
+demand(1.3)
+# p=1.4的需求量
+demand(1.4)
+```
+
+###return
+```{r}
+demand_return <- 
+  function(p){
+    q_d <- 10-5*p
+    return(q_d)
+  }
+# 印在螢幕，但Global Environment並不會有q_d
+demand_return(1.2)
+```
+
+最近一步會使用到電腦記憶體的運算值會暫時記在：
+```{r}
+.Last.value
+```
+
+```{r}
+# 要長久存在Global Environment要指定物件名稱（不要求與q_d同名）
+demand_return(1.2) -> q_d1.2
+```
+
+當function有return時,
+```{r}
+demand(1.2) # 相當於
+4
+```
+
+Details
+```{r}
+demand(1.2) -> q_d1.2 # 相當於
+4 -> q_d1.2
+```
+
+return(q_d)只會回傳q_d的「值」但不會回傳整個q_d物件在global environment裡。
+
+實際上，{...}裡所創造的物件都只是「暫時的」且「不放在global environment」，函數運作完就刪除，所以global environment裡就算有同名物件，也不會因函數運作而被不小心更動。
+```{r}
+q_d <- 5
+demand_return(p=1.2)
+print(q_d)
+```
+
+###Q1請寫下供給函數：
+qs=0+2p
+
+##5.2.2 今日天氣
+住三峽的小雯問：“Silly，今天天氣如何？”
+
+Silly需要知道什麼：
+
+日期、地點
+```{r}
+
+dateInput <- today()
+locationInput <- "新北市"
+```
+
+Silly找答案的策略：
+
+政府開放資料平台：
+```{r}
+jsonlite::fromJSON("https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/F-C0032-001?Authorization=rdec-key-123-45678-011121314&format=JSON") ->
+  weather_next36hours
+```
+
+給定日期，地點找出預報資訊
+```{r}
+# 找出符合地點的天氣資訊：weatherAtLocation
+(weather_next36hours$cwbopendata$dataset$location$locationName == locationInput) -> pick_location # 可挑出locationInput的「要/不要」向量
+
+weather_next36hours$cwbopendata$dataset$location$weatherElement[pick_location][[1]] -> weatherAtLocation
+
+# 在weatherAtLocation找出符合時間的天氣資訊
+
+(weatherAtLocation$elementName=="MaxT") ->
+  pick_MaxT
+(weatherAtLocation$elementName=="MinT") ->
+  pick_MinT
+weatherAtLocation$time[pick_MaxT][[1]]$parameter$parameterName[[1]] -> maxT
+weatherAtLocation$time[pick_MinT][[1]]$parameter$parameterName[[1]] -> minT
+
+glue::glue("{locationInput} {dateInput} 氣溫，最高{maxT}度，最低{minT}度。")
+```
+
+打造Silly天氣預報機器人：
+```{r}
+askSilly_weather <- function(locationInput,dateInput){
+  jsonlite::fromJSON("https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/F-C0032-001?Authorization=rdec-key-123-45678-011121314&format=JSON") ->
+  weather_next36hours
+  
+  (weather_next36hours$cwbopendata$dataset$location$locationName == locationInput) -> pick_location
+  
+  weather_next36hours$cwbopendata$dataset$location$weatherElement[pick_location][[1]] -> weatherAtLocation
+  (weatherAtLocation$elementName=="MaxT") ->
+    pick_MaxT
+  (weatherAtLocation$elementName=="MinT") ->
+    pick_MinT
+  weatherAtLocation$time[pick_MaxT][[1]]$parameter$parameterName[[1]] -> maxT
+  weatherAtLocation$time[pick_MinT][[1]]$parameter$parameterName[[1]] -> minT
+  
+  glue::glue("{locationInput} {dateInput} 氣溫，最高{maxT}度，最低{minT}度。")
+}
+```
+
+```{r}
+askSilly_weather("臺中市",today())
+askSilly_weather("花蓮縣",today())
+```
+
+打造一個國際時間轉換機器人叫what_time_it_is，使用方式如：
+```{r}
+what_time_it_is("Europe/Paris")
+```
+
+
+
+
+
+
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
