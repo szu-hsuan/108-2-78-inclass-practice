@@ -44,6 +44,8 @@ tpe_highSchools <- factor(tpe_highSchools)
 ### 1.1 類別排序
 請將tpe_highSchools的levels改成依以下次序排列：
 "臺北市立第一女中","台北市立第一女子高級中學","中山女中","中山女高", "台北市立中山女中", "臺北市立中山女子高級中學","國立政大附中", "國立政治大學附屬高級中學"
+*不可以這樣寫，會變成更改tpe_highSchools*
+*what you should do is set levels.*
 ```{r ans11}
 levels(tpe_highSchools) <- c("臺北市立第一女中","台北市立第一女子高級中學","中山女中","中山女高", "台北市立中山女中", "臺北市立中山女子高級中學","國立政大附中", "國立政治大學附屬高級中學")
 levels(tpe_highSchools) ->tpe_highSchools
