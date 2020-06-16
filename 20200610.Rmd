@@ -4,8 +4,13 @@ author: "吳思璇"
 date: "6/10/2020"
 output: html_document
 ---
-####5.3 Conditional Execution
-##5.3.1 if
+##5.3 Conditional Execution
+
+###5.3.1 if
+用在「某個條件符合才執行」的狀況。
+
+*condition 要是true 才會執行body*
+
 ```{r}
 if(condition){
   Body for TRUE
@@ -13,30 +18,75 @@ if(condition){
 ```
 
 condition: 它是個「是/否」問句。 (使用條件判斷來產生答案T/F，是個logical。)
+*4.4 relational operator*判斷描述
 
-readline()在Rmd裡只有當它單獨執行時才能正常運作，因為readline是個即時互動（interactive）函數，Rmd不是個即時互動環境。
+####判斷學號輸入正確與否
+在Rmd裡只有當它單獨執行時才能正常運作，因為readline是個即時互動（interactive）函數，Rmd不是個即時互動環境；Console 是個即時互動環境。
 
 ```{r}
+library(stringr)
+```
+
+*readline要單獨執行，不可以和一整個chunk一起執行*
+*promt :跳出來*
+```{r}
 # 先執行此行輸入學號
-studentId <- readline(prompt = "請輸入你的學號")
+readline(prompt = "請輸入你的學號") -> studentId 
 
 # 之後才執行以下程式
-if (str_detect(studentId, "[43](1[01][0-9]|9[0-9])[0-9]{5}", negate = T)  # condition: 是否輸入學號正確？
+if(
+  stringr::str_detect(studentId,'^[43](1[01][0-9]|9[0-9])[0-9]{5}$',negate=T) # condition: 是否輸入學號正確？
 ) {
-    warning("你所輸入的學號不正確")
+  warning("你所輸入的學號不正確") #Body for TRUE
 }
 ```
 
-##確認使用者有安裝需要套件
+*warning vs. print*
 ```{r}
-if (!require(lubridate)) {
-    # condition: 是否「沒安裝lubridate」？
-    install.packages("lubridate")
+print("你所輸入的學號不正確")
+warning("你所輸入的學號不正確")
+# 字顏色不一樣
+```
+
+*[ ] vs. ( ) vs. { }*
+[ ] : 字元strip
+( ) : 字群strip
+{ } : 要重複幾個
+
+*negate=T*
+學號不正確，才會是TRUE
+
+*如果畫面沒出現任何東西？*
+代表你輸入的學號是對的 or
+
+你的reget 寫錯了！！！！
+
+*偵錯*
+```{r}
+str_view(studentId,'[43](1[01][0-9]|9[0-9])[0-9]{5}')
+```
+the incorrect reason : `4102881029`是符合上面的描述，少設定開頭`＾`＆結尾`$`
+```{r}
+tr_view(studentId,'^[43](1[01][0-9]|9[0-9])[0-9]{5}$')
+```
+
+*detourㄌ*
+常用在確認使用者有安裝需要套件
+
+####確認使用者有安裝需要套件
+```{r}
+if(!require(lubridate)){ # condition: 是否「沒安裝lubridate」？
+  install.packages("lubridate")
 }
 lubridate::ymd_hms("2020-07-01 13:00:00 GMT")
 ```
+*require / true/ installed *
+*TRUE代表沒裝lubridate*
 
 在`4.6.5 前後鄰居描述Look around`一節，我們可以把它形成一個
+convert_TaiwanDate2WesternDate()函數：
+
+`4.6.5 前後鄰居描述Look around`
 ```{r}
 twDate <-  c("民國108年12月5日","民國98年10月5日")
 
@@ -75,10 +125,47 @@ str_replace(
 print(twDate_reformat)
 
 
-lubridate::ymd(twDate_reformat)
+lubridate::ymd(twDatwDate <-  c("民國108年12月5日","民國98年10月5日")
+
+library(stringr)
+# 準備regex: 
+## 取出：「前有」民國，「後有」年的「數字」「們」
+## "(?<={A_regex}){target_regex}(?={B_regex})"
+
+target_regex <- "[0-9]+"
+A_regex <- "民國"
+B_regex <- "年"
+
+regex_pattern <- glue::glue(
+  "(?<={A_regex}){target_regex}(?={B_regex})"
+  )
+
+print(regex_pattern)
+
+## 如果同學已經很熟就可以直接寫
+regex_pattern <-
+  "(?<=民國)[0-9]+(?=年)"
+
+# 取出民國年，計算西元年
+year <- 
+  str_extract(
+    twDate,
+    regex_pattern)
+westernYear <- as.integer(year)+1911
+
+# 替換民國xx年的xx成西元年數字
+str_replace(
+  twDate,
+  regex_pattern,  # 要換掉的文字
+  as.character(westernYear) # 要替換的內容
+) -> twDate_reformat
+print(twDate_reformat)
+
+
+lubridate::ymd(twDate_reformat)te_reformat)
 ```
 
-convert_TaiwanDate2WesternDate()函數：
+*convert_TaiwanDate2WesternDate()函數：*
 ```{r}
 convert_TaiwanDate2WesternDate <- function(twDate){
   library(stringr)
@@ -107,12 +194,18 @@ twDate <-  c("民國108年12月5日","民國98年10月5日")
 convert_TaiwanDate2WesternDate(twDate)
 ```
 
+存在westernDate，檢查class
+```{r}
+convert_TaiwanDate2WesternDate(twDate) -> westernDate
+class(westernDate)
+```
+
 
 這函數需要stringr及lubridate
 ```{r}
 convert_TaiwanDate2WesternDate <- function(twDate){
   
-  if(!require("stringr")){
+  if(!require("stringr")){ # 也可以用字串" "寫法
     install.packages("stringr")
   }
   if(!require("lubridate")){
@@ -142,99 +235,149 @@ convert_TaiwanDate2WesternDate <- function(twDate){
 }
 ```
 
+####1.寫一個check_package(pkgName)函數，它會檢查使用者是否有安裝pkgName值（class character，length=1）的套件，如果沒有就安裝
 
-##1.寫一個check_package(pkgName)函數，它會檢查使用者是否有安裝pkgName值（class character，length=1）的套件，如果沒有就安裝
+```{r}
+check_package <- function(p){
+  if(!require("p")){
+    install.packages("p")
+  }}
+```
+
+```{r}
+#1.寫一個check_package(pkgName)函數，它會檢查使用者是否有安裝pkgName值（class character，length=1）的套件，如果沒有就安裝
+check_package <- function(pkgName){
+  if(!require("pkgName")){
+    install.packages("pkgName")
+    }}
+```
+
 
 ```{r}
 # 測試
 check_package("clipr")
 check_package("SOAR")
 ```
+#####the use of "clipr"
 
-check_package()一次只能偵測一個套件是否有安裝。寫一個check_packages(pkgNames) (packages是複數)，它以給pkgNames input, pkgNames為class character, length任意。
+```{r}
+"寫一個check_package(pkgName)函數，它會檢查使用者是否有安裝pkgName值（class character，length=1）的套件，如果沒有就安裝" -> myText
+
+library(clipr) #run and then copy context you need 
+read_clip() -> myText2
+myText2
+```
+
+
+
+2.check_package()一次只能偵測一個套件是否有安裝。寫一個check_packages(pkgNames) (packages是複數)，它以給pkgNames input, pkgNames為class character, length任意。
 ```{r}
 # 測試
-check_packages(c("clipr", "SOAR"))
+check_packages(c("clipr","SOAR"))
 ```
 
-先前的`askSilly_weather函數`，如果使用者
-```{r}
-askSilly_weather <- function(locationInput, dateInput) {
-    weather_next36hours <- jsonlite::fromJSON("https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/F-C0032-001?Authorization=rdec-key-123-45678-011121314&format=JSON")
-    
-    pick_location <- (weather_next36hours$cwbopendata$dataset$location$locationName == 
-        locationInput)
-    
-    weatherAtLocation <- weather_next36hours$cwbopendata$dataset$location$weatherElement[pick_location][[1]]
-    pick_MaxT <- (weatherAtLocation$elementName == "MaxT")
-    pick_MinT <- (weatherAtLocation$elementName == "MinT")
-    maxT <- weatherAtLocation$time[pick_MaxT][[1]]$parameter$parameterName[[1]]
-    minT <- weatherAtLocation$time[pick_MinT][[1]]$parameter$parameterName[[1]]
-    
-    glue::glue("{locationInput} {dateInput} 氣溫，最高{maxT}度，最低{minT}度。")
-}
-```
+3.將convert_TaiwanDate2WesternDate的body有關套件檢查的部份改成你設計的check_package/check_packages。
+
+先前的`askSilly_weather`函數，如果使用者
 沒有安裝jsonlite；或
 
 縣市裡的「臺」使用簡體「台」
 
-都會產生錯誤訊息。請修改*askSilly_weather*解決那兩個問題。
+都會產生錯誤訊息。請修改askSilly_weather讓使用者不關有沒有安裝jsonlite或使用簡體「台」都沒問題。
+```{r}
+askSilly_weather <- function(locationInput,dateInput){
+  jsonlite::fromJSON("https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/F-C0032-001?Authorization=rdec-key-123-45678-011121314&format=JSON") ->
+  weather_next36hours
+  
+  (weather_next36hours$cwbopendata$dataset$location$locationName == locationInput) -> pick_location
+  
+  weather_next36hours$cwbopendata$dataset$location$weatherElement[pick_location][[1]] -> weatherAtLocation
+  (weatherAtLocation$elementName=="MaxT") ->
+    pick_MaxT
+  (weatherAtLocation$elementName=="MinT") ->
+    pick_MinT
+  weatherAtLocation$time[pick_MaxT][[1]]$parameter$parameterName[[1]] -> maxT
+  weatherAtLocation$time[pick_MinT][[1]]$parameter$parameterName[[1]] -> minT
+  
+  glue::glue("{locationInput} {dateInput} 氣溫，最高{maxT}度，最低{minT}度。")
+}
+```
 
-##不重覆下載
+####不重覆下載
 ```{r}
 # 檢視步驟耗時elapse time
-system.time(weather_next36hours <- jsonlite::fromJSON("https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/F-C0032-001?Authorization=rdec-key-123-45678-011121314&format=JSON"))
+system.time(
+  jsonlite::fromJSON("https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/F-C0032-001?Authorization=rdec-key-123-45678-011121314&format=JSON") ->
+  weather_next36hours
+)
 ```
 
+
+*exists: check whether "weather_next36hours" exists in the environment or not*
 ```{r}
-if (!exists("weather_next36hours")) {
-    weather_next36hours <- jsonlite::fromJSON("https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/F-C0032-001?Authorization=rdec-key-123-45678-011121314&format=JSON")
-    SOAR::Store(weather_next36hours)  # 存在.R_cache environment中
+if(!exists("weather_next36hours")){
+    jsonlite::fromJSON("https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/F-C0032-001?Authorization=rdec-key-123-45678-011121314&format=JSON") ->
+    weather_next36hours
+  SOAR::Store(weather_next36hours) # 存在.R_cache environment中
 }
 ```
-
 
 SOAR::Store(weather_next36hours)會
-創造一個.R_Cache環境並把weather_next36hours移到那裡放。
+*創造一個.R_Cache環境並把weather_next36hours移到那裡放。
 
 ```{r}
-askSilly_weather2 <- function(locationInput, dateInput) {
-    if (!exists("weather_next36hours")) {
-        weather_next36hours <- jsonlite::fromJSON("https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/F-C0032-001?Authorization=rdec-key-123-45678-011121314&format=JSON")
-        SOAR::Store(weather_next36hours)  # 存在.R_cache environment中
-    }
-    pick_location <- (weather_next36hours$cwbopendata$dataset$location$locationName == 
-        locationInput)
-    
-    weatherAtLocation <- weather_next36hours$cwbopendata$dataset$location$weatherElement[pick_location][[1]]
-    pick_MaxT <- (weatherAtLocation$elementName == "MaxT")
-    pick_MinT <- (weatherAtLocation$elementName == "MinT")
-    maxT <- weatherAtLocation$time[pick_MaxT][[1]]$parameter$parameterName[[1]]
-    minT <- weatherAtLocation$time[pick_MinT][[1]]$parameter$parameterName[[1]]
-    
-    glue::glue("{locationInput} {dateInput} 氣溫，最高{maxT}度，最低{minT}度。")
+askSilly_weather2 <- function(locationInput,dateInput){
+  if(!exists("weather_next36hours")){
+      jsonlite::fromJSON("https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/F-C0032-001?Authorization=rdec-key-123-45678-011121314&format=JSON") ->
+      weather_next36hours
+    SOAR::Store(weather_next36hours) # 存在.R_cache environment中
+  }  
+  (weather_next36hours$cwbopendata$dataset$location$locationName == locationInput) -> pick_location
+  
+  weather_next36hours$cwbopendata$dataset$location$weatherElement[pick_location][[1]] -> weatherAtLocation
+  (weatherAtLocation$elementName=="MaxT") ->
+    pick_MaxT
+  (weatherAtLocation$elementName=="MinT") ->
+    pick_MinT
+  weatherAtLocation$time[pick_MaxT][[1]]$parameter$parameterName[[1]] -> maxT
+  weatherAtLocation$time[pick_MinT][[1]]$parameter$parameterName[[1]] -> minT
+  
+  glue::glue("{locationInput} {dateInput} 氣溫，最高{maxT}度，最低{minT}度。")
 }
 ```
 
 ```{r}
-system.time(askSilly_weather("新北市", today()))
-system.time(askSilly_weather("臺北市", today()))
+library(lubridate) #cauz there are "today()" in the following chunk
+```
 
-askSilly_weather("新北市", today())
-askSilly_weather("臺北市", today())
+
+```{r}
+system.time(
+  askSilly_weather("新北市",today())
+)
+system.time(
+  askSilly_weather("臺北市",today())
+)
+
+askSilly_weather("新北市",today())
+askSilly_weather("臺北市",today())
 ```
 
 ```{r}
 SOAR::Remove(weather_next36hours)
-system.time(askSilly_weather2("新北市", today()))
-system.time(askSilly_weather2("臺北市", today()))
+system.time(
+  askSilly_weather2("新北市",today())
+)
+system.time(
+  askSilly_weather2("臺北市",today())
+)
 
-askSilly_weather2("新北市", today())
-askSilly_weather2("臺北市", today())
+askSilly_weather2("新北市",today())
+askSilly_weather2("臺北市",today())
 ```
 
-##5.3.2 if else
-```{r}
+###5.3.2 if else
+```{r eval=FALSE}
 if(condition){
   body for TRUE condition
 } else {
@@ -242,24 +385,766 @@ if(condition){
 }
 ```
 
+*} else {* must look like this
+
+#??`} return(fvalue)`an example
+```{r}
+myfun <- function(n){
+  if((n %% 2 == 1)) { #odd
+    fvalue <- -(n+1)/2
+  } else { fvalue <- n/2 #even
+  } 
+  return(fvalue)
+}
+myfun(54)
+```
 
 
+<figure>
+<figcaption>圖示if…else流程</figcaption>
 
 
+Mathematical function
+$$f(n)={n/2if n is even
+−(n+1)/2if n is odd$$
+
+```{r}
+# n 為偶數
+n <- 54
+fvalue <- n/2
+
+# n 為奇數
+n <- 33
+fvalue <- -(n+1)/2
+```
 
 
+Condition設計：n「是/否」為偶數？
+*%% : 餘數* 
+```{r}
+(n %% 2)==1 # 表示「奇數」; 或...
+
+as.logical(n %% 2) # 只有0會變F，其他數值都是T
+```
 
 
+###if…else…組合：
+```{r}
+n <- 54
+if(as.logical(n %% 2)){
+  fvalue <- -(n+1)/2
+} else {
+  fvalue <- n/2
+}
+```
 
 
+```{r}
+myFun <- function(n){
+  if(as.logical(n %% 2)){
+    fvalue <- -(n+1)/2
+  } else {
+    fvalue <- n/2
+  }
+  return(fvalue)
+}
+
+myFun(54)
+myFun(33)
+```
 
 
+####交卷提早時間
+
+```{r}
+jsonlite::fromJSON("https://www.dropbox.com/s/d14j5hp3i5ps657/examSubmissionTimes.json?dl=1") -> examSubmissionTime
+
+# head 前6筆資料
+head(examSubmissionTime$section)
+head(examSubmissionTime$time)
+```
 
 
+Details
+56節：deadline 下午3點
+
+78節（即非56節）：deadline 下午5點
+
+給定第i位學生，我們怎麼計算他/她的交卷提早時間？
 
 
+####沒有分歧情境
+只有一個交卷時間：
+```{r}
+i<-1
+student_i_section <- examSubmissionTime$section[[i]]
+student_i_time <- examSubmissionTime$time[[i]]
+
+deadline <- lubridate::ymd_hms("2020-05-27 15:00:00", tz="Asia/Taipei") # 
+
+howEarly <- deadline - lubridate::ymd_hms(
+  student_i_time, tz="Asia/Taipei") 
+print(howEarly)
+```
 
 
+####有分歧情境
+有兩個交卷時間：
+56節/78節
+
+56節:
+```{r}
+deadline <- lubridate::ymd_hms("2020-05-27 15:00:00", tz="Asia/Taipei")
+```
+
+78節:
+```{r}
+deadline <- lubridate::ymd_hms("2020-05-27 17:00:00", tz="Asia/Taipei")
+```
+
+
+===流程分歧點結束===
+```{r}
+howEarly <- deadline - lubridate::ymd_hms(student_i_time, tz="Asia/Taipei")
+print(howEarly)
+```
+
+
+####使用if…else控制情境分歧
+
+Condition設計：
+```{r}
+student_i_section=="56"
+```
+
+
+if…else…組合：
+```{r}
+i<-1
+student_i_section <- examSubmissionTime$section[[i]]
+student_i_time <- examSubmissionTime$time[[i]]
+
+if(student_i_section=="56"){
+  deadline <- lubridate::ymd_hms("2020-05-27 15:00:00", tz="Asia/Taipei")
+} else {
+  deadline <- lubridate::ymd_hms("2020-05-27 17:00:00", tz="Asia/Taipei")
+}
+
+howEarly <- deadline - lubridate::ymd_hms(student_i_time, tz="Asia/Taipei")
+print(howEarly)
+```
+
+
+我們可以使用function＋map算出每位同學提早時間：
+```{r}
+compute_howEarly <- function(student_i_section, student_i_time){
+  # student_i_section <- examSubmissionTime$section[[i]]
+  # student_i_time <- examSubmissionTime$time[[i]]
+  
+  if(student_i_section=="56"){
+    deadline <- lubridate::ymd_hms("2020-05-27 15:00:00", tz="Asia/Taipei")
+  } else {
+    deadline <- lubridate::ymd_hms("2020-05-27 17:00:00", tz="Asia/Taipei")
+  }
+  
+  howEarly <- deadline - lubridate::ymd_hms(student_i_time, tz="Asia/Taipei")
+  # print(howEarly)
+  
+  return(howEarly)
+}
+```
+
+
+```{r}
+compute_howEarly(examSubmissionTime$section[[1]],examSubmissionTime$time[[1]])
+compute_howEarly(examSubmissionTime$section[[2]],examSubmissionTime$time[[2]])
+compute_howEarly(examSubmissionTime$section[[3]],examSubmissionTime$time[[3]])
+```
+
+```{r}
+library(purr)
+```
+##!!rewrite again
+```{r}
+studentSequence <- 1:length(examSubmissionTime$section)
+
+map(studentSequence,
+    ~compute_howEarly(
+      examSubmissionTime$section[[.x]],
+      examSubmissionTime$time[[.x]])
+    ) -> list_howEarly
+```
+
+
+78節和56節交卷提早時間比較:
+
+```{r}
+library(magrittr)
+list_howEarly %>%
+  unlist() -> examSubmissionTime$howEarly
+
+pick_56 <- examSubmissionTime$section=="56"
+mean(examSubmissionTime$howEarly[pick_56])
+median(examSubmissionTime$howEarly[pick_56])
+
+pick_78 <- examSubmissionTime$section=="78"
+mean(examSubmissionTime$howEarly[pick_78])
+median(examSubmissionTime$howEarly[pick_78])
+```
+
+
+##5.3.3 if…else if… else
+
+有時流程需要的分歧不只兩種情境，這時可以使用：
+```{r}
+if(condition A){
+  body for A 
+} else if(condition B){
+  body for B
+} else if(condition C){
+  body for C
+} else {
+  body for none of the above
+}
+```
+
+*依需要可以不斷增加else if(...){....}的部份在中間。*
+*else if 或 else前面一定要保有前一段情境的結束}*
+
+*格式別亂動*
+
+成績等級：
+
+>=90: 優 # condition A
+
+80-89：良 # condition B
+
+70-79：尚可 # condition C
+
+70以下：待加強 # else
+```{r}
+readline("請輸入你的成績（整數）： ") -> grade # 單獨執行
+```
+
+
+```{r}
+if(grade >=90){#True
+  print("優")
+} else if(grade>=80 & grade<=89){
+  print("良")
+} else if(grade>=70 & grade<=79){
+  print("尚可")
+} else {
+  print("待加強")
+}
+```
+
+
+*各情境一定要互斥，即不可以有兩個情境有可能同時為TRUE，如果發生多個情境吻合會以第一個結果的body來執行。*
+
+```{r}
+grade <- 80
+if(grade >=90){
+  print("優")
+} else if(grade>=75 & grade<=89){
+  print("良")
+} else if(grade>=70 & grade<=85){
+  print("尚可")
+} else {
+  print("待加強")
+}
+```
+
+
+```{r}
+grade <- 80
+if(grade >=90){
+  print("優")
+} else if(grade>=70 & grade<=85){
+  print("尚可")
+} else if(grade>=75 & grade<=89){
+  print("良")
+} else {
+  print("待加強")
+}
+```
+
+
+##5.3.4 switch
+另一種條件式執行常用在condition種類煩雜或要全部以「是/否」問句來切出所有互斥condition情境不容易設計時。
+
+condition改成用文字描述，即conditionExpression。
+
+不同conditionExpression與對應body內容改成使用一對對的:
+
+"conditionExpression文字"={body 內容} 的name=value pair
+
+
+```{r}
+switch(實現的conditionExpression,
+       "conditionExpression1"= {    },
+       "conditionExpression2"= {    },
+       :
+       :
+       "conditionExpressionN"= {    },
+       {    })
+```
+
+
+f(n)={n/2if n is even
+−(n+1)/2if n is odd
+
+```{r}
+n<- 540
+
+conditionExpression_outcome=
+  ifelse(n %% 2==0, "even", "odd") 
+
+switch(
+  conditionExpression_outcome,
+  "even"={fvalue <- n/2}, # 偶數
+  "odd"=fvalue <- -(n+1)/2, # 奇數；只有一行指令可省略{}
+  warning("n要整數喔")  
+)
+
+print(fvalue)
+```
+
+
+ifelse(test, yes, no)是超級好用/常用的函數：
+
+test: class logical. 測試條件的結果
+
+yes: 結果為T 時你希望的回傳值
+
+no: 結果為F 時你希望的回傳值
+
+```{r}
+grades <- c(52, 77, 59, 88, 90)
+
+ifelse(grades >= 60, "及格", "不及格")
+```
+
+
+在R裡{...}（大括號, brace）：
+
+若只有一行指令則{}符號可省略。
+
+依照上一個特性，function(...){....}的body若只有一行指令可省略{...}改寫成function(...) ..., 只是要小心body … 要接在function(...)之後不可換行。
+
+```{r}
+miniFun <- function(){
+  lubridate::now()
+}
+miniFun()
+```
+
+```{r}
+miniFun2 <- function() lubridate::now()
+miniFun2()
+```
+
+
+若最後一個被執行的指令會產生print在螢幕的效果，則可以用{...}->或<-{...}將這print的值存出來。
+
+
+```{r}
+result <- 
+  {
+    x <- 2
+    y <- 3
+    x**y+15
+  }
+print(result)
+```
+
+
+```{r}
+result2 <-
+  {
+    x <- 2
+    y <- 3
+    if(x< 3){
+      warning("x值太小")
+    } else {
+      x**y+15
+    }
+  }
+print(result2)
+```
+
+
+依照上一個特性，function(...){....}的body若最後一個「被執行」的指令是會印在螢幕的值，如該值要當回傳值可以不用return(...)就可以產生值回傳效果。
+
+```{r}
+myFun <- function(x,y){
+  return(x**y+15)
+}
+
+# 等同於
+myFun2 <- function(x,y){
+  x**y+15
+}
+
+myFun(5,3) -> outcome
+myFun2(5,3) -> outcome2
+print(outcome)
+print(outcome2)
+```
+
+
+##cut：連續轉類別
+可適當使用cut()函數將與「連續型」數值變數有關的condition轉成需要的字串表示，
+
+```{r}
+cut(x, c(a,b,c))
+```
+
+會將x分成(a,b], (b,c], 及NA 三大類。
+
+x只要type是integer, double的資料都可使用，所以日期，時間都可以
+
+(a,b]在數學上是a< . <=b，所以左側a值是「不包含」在裡面的
+
+其中最小值可以是負無窮-Inf, 最大值可以是正無窮Inf。
+
+```{r}
+a <- c(1,2,3)
+cut(a, c(1,2,3))
+```
+
+數字成績轉英文字母成績 成績等級：
+
+>=90: A 同時螢幕出現“好棒棒” （89<…<=100）
+
+80-89：B 同時螢幕出現“好棒” （79<…<=89）
+
+70-79：C 同時螢幕出現“棒” （69<…<=79）
+
+70以下：F 同時螢幕出現"-_-" (-1<…<=69)
+
+```{r}
+grade <- sample(1:100, 10, replace=T)
+
+grade %>%
+  cut(c(-1,69,79,89,100)) -> grade
+
+levels(grade)
+
+switch(
+  as.character(grade[[1]]),
+  "(-1,69]"={
+    print("-_-")
+    "F"},
+  "(69,79]"={
+    print("棒")
+    "C"
+    },
+  "(79,89]"={
+    print("好棒")
+    "B"
+    },
+  "(89,100]"={
+    print("好棒棒")
+    "A"
+    }
+) -> letterGrade # 有回存時要螢幕印出的訊息一定要加print
+```
+
+####寫一個compute_letterGrade(myGrade)函數, 可以依myGrade不同而回傳letterGrade且出現要求文字。
+
+管家機器人:
+
+一家三口，
+
+早上(06:00-09:00)： 媽媽讀《經濟學人》，爸爸讀《WSJ》，提醒小明“檢查書包東西都有帶嗎？”
+
+晚上(17:00-19:00)： 媽媽準備全家晚餐點foodpanda，爸爸瀏覽tripadvisor(https://www.tripadvisor.com/)規劃週末全家旅行，提醒小明“作業寫好了嗎？”
+
+晚上(23:30-次日淩晨1點)： 媽媽聆聽Spotify Jazz Classics(https://open.spotify.com/playlist/37i9dQZF1DXbITWG1ZJKYt)
+
+其他時段：“機器人要休息，饒了我吧～～”
+
+```{r}
+nowtime <- glue::glue("{today()} 18:00:00") %>% ymd_hms(tz="Asia/Taipei")
+
+library(lubridate)
+library(glue)
+
+# 建立可當cutpoints的一天時間點
+cutpoints <-
+  c(
+    glue("{today()} 06:00:00"),
+    glue("{today()} 09:00:00"),
+    glue("{today()} 17:00:00"),
+    glue("{today()} 19:00:00"),
+    glue("{today()} 23:30:00"),
+    glue("{today()+days(1)} 01:00:00")
+  )
+cutpoints %>%
+  ymd_hms(tz="Asia/Taipei") -> cutpoints
+
+## 將nowtime轉成它對應的時段是"morning", "evening", 或其他。
+cut(nowtime, cutpoints) -> nowtime
+levels(nowtime)[c(1,3,5)] <-
+  c("morning","evening","jazz time")
+
+## 使用switch決定要做什麼事
+switch(
+  as.character(nowtime),
+  "morning"={
+    print("要不要來閱讀點國際時事？")
+    browseURL("https://economist.com")
+  },
+  "evening"={
+    print("需不需要點餐呢？")
+    browseURL("https://www.foodpanda.com.tw/")
+  },
+  "jazz time"={
+    print("放鬆聽點Jazz。")
+    browseURL("https://open.spotify.com/playlist/37i9dQZF1DXbITWG1ZJKYt")
+  },
+  {
+    print("機器人要休息，饒了我吧～～")
+  }
+)
+```
+
+```{r}
+whatNeedToDo_butler_mom <- function(nowtime=now()){
+  library(lubridate)
+  library(glue)
+
+  cutpoints <-
+    c(
+      glue("{today()} 06:00:00"),
+      glue("{today()} 09:00:00"),
+      glue("{today()} 17:00:00"),
+      glue("{today()} 19:00:00"),
+      glue("{today()} 23:30:00"),
+      glue("{today()+days(1)} 01:00:00")
+    )
+  cutpoints %>%
+    ymd_hms(tz="Asia/Taipei") -> cutpoints
+  
+  cut(nowtime, cutpoints) -> nowtime
+  levels(nowtime)[c(1,3,5)] <-
+    c("morning","evening","jazz time")
+  
+  switch(
+    as.character(nowtime),
+    "morning"={
+      print("要不要來閱讀點國際時事？")
+      browseURL("https://economist.com")
+    },
+    "evening"={
+      print("需不需要點餐呢？")
+      browseURL("https://www.foodpanda.com.tw/")
+    },
+    "jazz time"={
+      print("放鬆聽點Jazz。")
+      browseURL("https://open.spotify.com/playlist/37i9dQZF1DXbITWG1ZJKYt")
+    },
+    {
+      print("機器人要休息，饒了我吧～～")
+    }
+  )
+}
+
+ymd_hms(glue::glue("{today()} 08:00:00"),tz="Asia/Taipei") %>%
+  whatNeedToDo_butler_mom()
+
+ymd_hms(glue::glue("{today()} 14:00:00"),tz="Asia/Taipei") %>%
+  whatNeedToDo_butler_mom()
+
+ymd_hms(glue::glue("{today()} 18:00:00"),tz="Asia/Taipei") %>%
+  whatNeedToDo_butler_mom()
+
+ymd_hms(glue::glue("{today()+days(1)} 00:20:00"),tz="Asia/Taipei") %>%
+  whatNeedToDo_butler_mom()
+```
+
+上面的流程其實也可以用if… else if… else來做而不用switch，請用if… else if… else來創造whatNeedToDo_butler_mom。
+
+####請完成給爸爸和小明的管家機器人，whatNeedToDo_butler_dad和whatNeedToDo_butler_ming。
+
+
+##5.3.5 logical condition
+由於if, if…else, if…if else…else, 都是用來決定要不要執行某個body，所以(condition) 必需要是「一個」T/F logical value。
+
+比對答案
+```{r}
+myAnswer <- c(2,3,6)
+correctAnswer <- c(2,3,5)
+
+if(myAnswer == correctAnswer){ # 只取用第一個T/F
+  print("你答對了")
+}
+```
+
+
+R3.5以上版本可以設定
+```{r}
+Sys.setenv("_R_CHECK_LENGTH_1_CONDITION_" = "true")
+```
+
+禁止length>1的logical condition.
+
+##all, any
+
+```{r}
+myAnswer <- c(2,3,6)
+correctAnswer <- c(2,3,5)
+
+if(all(myAnswer == correctAnswer)){ # 要全TRUE
+  print("你答對了")
+}
+```
+
+
+```{r}
+if(any(myAnswer == correctAnswer)){ # 只要有一個TRUE
+  print("裡頭有數字是對的")
+}
+```
+
+####寫一個grading(myAnswer, correctAnswer)函數可以用來比對兩者是否class及所有元素都相同，是才回傳10分，不是回傳0分。
+
+
+##&& ||
+有時「資訊到這裡就夠判斷情境」會產生，這時可以用&&或｜｜
+
+對答案：
+
+class, 內容都要對
+
+```{r}
+myAnswer <- c(1,2,3)
+correctAnswer <- factor(c(1,2,3))
+
+if(is.factor(myAnswer) && all(myAnswer==correctAnswer)){
+  print("答對了")
+  10
+} else {
+  print("答錯了")
+  0
+}-> myGrade
+myGrade
+```
+
+
+```{r}
+if(is.factor(myAnswer) & all(myAnswer==correctAnswer)){
+  print("答對了")
+  10
+} else {
+  print("答錯了")
+  0
+}-> myGrade
+myGrade
+```
+
+&會計算所有relations，&&只計算到第一個出現FALSE的relation.
+
+&&用在「有一個錯就算錯」的情境。
+|會計算所有relations，||只計算到第一個出現TRUE的relation.
+
+||用在「有一個對就算對」的情境。
+在進行condition execution時，使用&&, ||會比&, |更有運算效率。
+
+condition最好少使用&或|因為兩邊relations若為logical向量長度>1，結果也會是個logical向量長度>1。
+
+####只要符合以下資格均可申請補助：
+
+年齡>=65
+
+家庭子孩數>3
+```{r}
+myAge <- 40
+myChildrenNumber <- 5
+
+if(myAge >=65 | myChildrenNumber >3){
+  "符合申請資格"
+} else {
+  warning("不符合申請資格")
+}
+
+if(myAge >=65 ||  myChildrenNumber >3){
+  "符合申請資格"
+} else {
+  warning("不符合申請資格")
+}
+```
+
+那改成
+```{r}
+myAge <- 67
+myChildrenNumber <- 5
+```
+
+5.3節主要在介紹「依情境執行不同body」的conditional execution，另外還有「依情境不同產生不同值」的conditional assignment。
+
+一個logical relation:
+```{r}
+x <- c(2,5,10,-21,3,8)
+ifelse(x %% 2==0, "even", "odd")
+```
+
+多個logical relations:
+```{r}
+y <- sample(40:100,20, replace=T)
+dplyr::case_when(
+  y < 60 ~ "F",
+  60<=y & y < 70 ~"D",
+  71<=y & y < 80 ~"C",
+  80<=y & y < 90 ~"B",
+  90<=y ~ "A"
+)
+```
+
+####將5.4.3小節中whatNeedToDo_butler_mom body裡的cut改成使用dplyr::case_when.
+
+##5.3.6 綜合練習
+消費者選擇
+效用函數：
+U(a1,a2)=a1α∗a2(1−α)−m
+ 
+a1是該商品提供之服務所帶來的愉快程度，a2是該商品操作簡便性， 
+α
+ 是個介於0與1之間的數字， 
+m
+ 則是購買此商品所要付出的金額。
+
+想像有一系列類似的App你在考慮購買且只買一次、只買一個，每個App可用一組 
+(a1,a2,m)
+ 的數字組合來代表，n個App可表示成一個集合 
+(a11,a21,m1),(a12,a22,m2),...,(a1n,a2n,mn)
+ ，消費者只選擇這些App中效用函數值最高的那個。
+
+####1.1 創造Ufun(a1, a2, m, alpha=0.5)函數，其中
+
+Arguments：
+
+a1, a2, m, alpha: 均為class numeric
+
+Value:
+
+回傳arugment values下所對應的效用函數值(class numeric)
+
+1.2 以下10個App計算並回傳它們的效用值(class numeric, length=10)
+
+
+####原始資料收回後常會依某些數值區間來分成不同組別，且描述手法均類似：
+“未滿200,000元”, “200,000～299,999元”, “300,000元及以上”
+
+“200,000以下”, “200,000～299,999元”, “超過且包含300,000元”
+
+請寫一個str_interval2cutpoints(str_interval)函數，它能萬用的讓你進行「級距組別描述」轉對應「cut函數所需cutpoints]，
+
+Arguement:
+
+str_interval: class character, 如c(“未滿200,000元”, “200,000～299,999元”, “300,000元及以上”)
+Value: 回傳值為class numeric，且用在cut(x, cutpoints)上（假設cutpoints為str_interval2cupoints回傳值），能把x依中文組距描述進行適當類別分類。
 
 
 
