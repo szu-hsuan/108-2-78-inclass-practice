@@ -247,8 +247,8 @@ check_package <- function(p){
 ```{r}
 #1.寫一個check_package(pkgName)函數，它會檢查使用者是否有安裝pkgName值（class character，length=1）的套件，如果沒有就安裝
 check_package <- function(pkgName){
-  if(!require("pkgName")){
-    install.packages("pkgName")
+  if(!require(pkgName)){
+    install.packages(pkgName)
     }}
 ```
 
@@ -671,6 +671,14 @@ if(grade >=90){
 
 
 ##5.3.4 switch
+
+```{r}
+library(lubridate) # Date/Time
+library(stringr) # character
+library(purrr) # map
+library(magrittr) # pipe
+```
+
 另一種條件式執行常用在condition種類煩雜或要全部以「是/否」問句來切出所有互斥condition情境不容易設計時。
 
 condition改成用文字描述，即conditionExpression。
@@ -681,24 +689,36 @@ condition改成用文字描述，即conditionExpression。
 
 
 ```{r}
-switch(實現的conditionExpression,
+switch(實現的conditionExpression # class character,
        "conditionExpression1"= {    },
        "conditionExpression2"= {    },
        :
        :
        "conditionExpressionN"= {    },
-       {    })
+       { # else   })
+```
+
+"conditionExpression1"= {    }:*"name"={value}*
+
+f(n)={n/2 if n is even
+−(n+1)/2 if n is odd
+
+```{r}
+if (n %% ==1) {
+  fvalue= -(n+1)/2
+} else {
+  fvalue= n/2
+}
 ```
 
 
-f(n)={n/2if n is even
-−(n+1)/2if n is odd
+%% : remain，餘數
 
 ```{r}
 n<- 540
 
 conditionExpression_outcome=
-  ifelse(n %% 2==0, "even", "odd") 
+  ifelse(n %%  2==0, "even", "odd") 
 
 switch(
   conditionExpression_outcome,
