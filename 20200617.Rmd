@@ -1,0 +1,573 @@
+---
+title: '20200617'
+author: "吳思璇"
+date: "6/18/2020"
+output: html_document
+---
+##5.3.4 switch
+
+```{r}
+library(lubridate) # Date/Time
+library(stringr) # character
+library(purrr) # map
+library(magrittr) # pipe
+```
+
+另一種條件式執行常用在condition種類煩雜或要全部以「是/否」問句來切出所有互斥condition情境不容易設計時。
+
+condition改成用文字描述，即conditionExpression。
+
+不同conditionExpression與對應body內容改成使用一對對的:
+
+"conditionExpression文字"={body 內容} 的name=value pair
+
+
+```{r}
+switch(實現的conditionExpression # class character,
+       "conditionExpression1"= {    },
+       "conditionExpression2"= {    },
+       :
+       :
+       "conditionExpressionN"= {    },
+       { # else   })
+```
+
+"conditionExpression1"= {    }:*"name"={value}*
+
+f(n)={n/2 if n is even
+−(n+1)/2 if n is odd
+
+```{r}
+if (n %% 2 == 1) {
+  fvalue= -(n+1)/2
+} else {
+  fvalue= n/2
+}
+```
+
+
+%% : remain，餘數
+
+```{r}
+n<- 540
+
+conditionExpression_outcome=
+  ifelse(n %%  2==0, "even", "odd") 
+
+switch(
+  conditionExpression_outcome,
+  "even"={fvalue <- n/2}, # 偶數
+  "odd"=fvalue <- -(n+1)/2, # 奇數；只有一行指令可省略{}
+  warning("n要整數喔")  # else的情境因為只有一行指令，也可不用大括號
+)
+
+print(fvalue)
+```
+
+
+`ifelse`(test, yes, no)是超級好用/常用的函數：
+*數字依據是否符合邏輯條件，轉成相匹配的中文(character)*
+
+test: class logical. 測試條件的結果
+yes: 結果為T 時你希望的回傳值
+no: 結果為F 時你希望的回傳值
+
+```{r}
+grades <- c(52, 77, 59, 88, 90)
+
+ifelse(grades >= 60, "及格", "不及格")
+```
+
+
+##don't understand在R裡{...}（大括號, brace）：
+
+若只有一行指令則{}符號可省略。
+
+依照上一個特性，function(...){....}的body若只有一行指令可省略{...}改寫成function(...) ..., 只是要小心body … 要接在function(...)之後不可換行。
+
+```{r}
+miniFun <- function(){
+  lubridate::now()
+}
+miniFun()
+```
+
+equal as :
+```{r}
+miniFun2 <- function() lubridate::now()
+miniFun2()
+```
+
+
+若最後一個被執行的指令會產生print在螢幕的效果，則可以用{...}->或<-{...}將這print的值存出來。
+
+`**` :次方＝＾
+```{r}
+result <- 
+  {
+    x <- 2
+    y <- 3
+    x**y+15
+  }
+print(result)
+```
+
+
+```{r}
+result2 <-
+  {
+    x <- 2
+    y <- 3
+    if(x< 3){
+      warning("x值太小")
+    } else {
+      x**y+15
+    }
+  }
+print(result2)
+```
+
+
+依照上一個特性，function(...){....}的body若最後一個「被執行」的指令是會印在螢幕的值，如該值要當回傳值可以不用return(...)就可以產生值回傳效果。
+
+```{r}
+myFun <- function(x,y){
+  return(x**y+15)
+}
+
+# 等同於
+myFun2 <- function(x,y){
+  x**y+15
+}
+
+myFun(5,3) -> outcome
+myFun2(5,3) -> outcome2
+print(outcome)
+print(outcome2)
+```
+
+
+##cut：連續轉類別, based on the point you give
+可適當使用cut()函數將與「連續型」數值變數有關的condition轉成需要的字串表示，
+
+```{r}
+cut(x, c(a,b,c))
+```
+
+會將x分成(a,b], (b,c], 及NA 三大類。
+a<x<=b, b<x<=c
+( ): 不包含
+[ ]: 包含
+x只要type是integer, double的資料都可使用，所以日期，時間都可以
+
+(a,b]在數學上是a< . <=b，所以左側a值是「不包含」在裡面的
+
+其中最小值可以是負無窮-Inf, 最大值可以是正無窮Inf。
+
+```{r}
+a <- c(1,2,3)
+cut(a, c(1,2,3))
+```
+##why is double
+double 是小數點
+```{r}
+typeof(a)
+```
+*要會自己換算成 x<y<=z*
+數字成績轉英文字母成績 成績等級：
+
+>=90: A 同時螢幕出現“好棒棒” （89<…<=100）
+
+80-89：B 同時螢幕出現“好棒” （79<…<=89）
+
+70-79：C 同時螢幕出現“棒” （69<…<=79）
+
+70以下：F 同時螢幕出現"-_-" (-1<…<=69)  不可以寫0（cauz score is likely to be 0)
+
+```{r}
+grade <- sample(1:100, 10, replace=T)
+
+grade
+cut(grade,c(-1,69,79,89,100))
+
+grade %>%
+  cut(c(-1,69,79,89,100)) -> grade
+
+levels(grade)
+
+switch(
+  as.character(grade[[1]]),
+  "(-1,69]"={
+    print("-_-")
+    "F"},
+  "(69,79]"={
+    print("棒")
+    "C"
+    },
+  "(79,89]"={
+    print("好棒")
+    "B"
+    },
+  "(89,100]"={
+    print("好棒棒")
+    "A"
+    }
+) -> letterGrade # 有回存時要螢幕印出的訊息一定要加print
+```
+
+寫一個compute_letterGrade(myGrade)函數, 可以依myGrade不同而回傳letterGrade且出現要求文字。
+*add print()*
+
+管家機器人:
+
+一家三口，
+
+早上(06:00-09:00)： 媽媽讀《經濟學人》，爸爸讀《WSJ》，提醒小明“檢查書包東西都有帶嗎？”
+
+晚上(17:00-19:00)： 媽媽準備全家晚餐點foodpanda，爸爸瀏覽tripadvisor(https://www.tripadvisor.com/)規劃週末全家旅行，提醒小明“作業寫好了嗎？”
+
+晚上(23:30-次日淩晨1點)： 媽媽聆聽Spotify Jazz Classics(https://open.spotify.com/playlist/37i9dQZF1DXbITWG1ZJKYt)
+
+其他時段：“機器人要休息，饒了我吧～～”
+
+```{r}
+nowtime <- glue::glue("{today()} 18:00:00") %>% ymd_hms(tz="Asia/Taipei")
+
+# check class & type
+class(nowtime)
+typeof(nowtime)
+
+
+library(lubridate)
+library(glue)
+
+# 建立可當cutpoints的一天時間點
+cutpoints <-
+  c(
+    glue("{today()} 06:00:00"),
+    glue("{today()} 09:00:00"),
+    glue("{today()} 17:00:00"),
+    glue("{today()} 19:00:00"),
+    glue("{today()} 23:30:00"),
+    glue("{today()+days(1)} 01:00:00")
+  ) # add 1 day can't type "+1" only
+cutpoints %>%
+  ymd_hms(tz="Asia/Taipei") -> cutpoints
+
+## 將nowtime轉成它對應的時段是"morning", "evening", 或其他。
+cut(nowtime, cutpoints) -> nowtime
+levels(nowtime)[c(1,3,5)] <-
+  c("morning","evening","jazz time")
+
+## 使用switch決定要做什麼事
+switch(
+  as.character(nowtime),
+  "morning"={
+    print("要不要來閱讀點國際時事？")
+    browseURL("https://economist.com")
+  },
+  "evening"={
+    print("需不需要點餐呢？")
+    browseURL("https://www.foodpanda.com.tw/")
+  },
+  "jazz time"={
+    print("放鬆聽點Jazz。")
+    browseURL("https://open.spotify.com/playlist/37i9dQZF1DXbITWG1ZJKYt")
+  },
+  {
+    print("機器人要休息，饒了我吧～～")
+  }
+)
+```
+
+```{r}
+whatNeedToDo_butler_mom <- function(nowtime=now()){
+  library(lubridate)
+  library(glue)
+
+  cutpoints <-
+    c(
+      glue("{today()} 06:00:00"),
+      glue("{today()} 09:00:00"),
+      glue("{today()} 17:00:00"),
+      glue("{today()} 19:00:00"),
+      glue("{today()} 23:30:00"),
+      glue("{today()+days(1)} 01:00:00")
+    )
+  cutpoints %>%
+    ymd_hms(tz="Asia/Taipei") -> cutpoints
+  
+  cut(nowtime, cutpoints) -> nowtime
+  levels(nowtime)[c(1,3,5)] <-
+    c("morning","evening","jazz time")
+  
+  switch(
+    as.character(nowtime),
+    "morning"={
+      print("要不要來閱讀點國際時事？")
+      browseURL("https://economist.com")
+    },
+    "evening"={
+      print("需不需要點餐呢？")
+      browseURL("https://www.foodpanda.com.tw/")
+    },
+    "jazz time"={
+      print("放鬆聽點Jazz。")
+      browseURL("https://open.spotify.com/playlist/37i9dQZF1DXbITWG1ZJKYt")
+    },
+    {
+      print("機器人要休息，饒了我吧～～")
+    }
+  )
+}
+
+ymd_hms(glue::glue("{today()} 08:00:00"),tz="Asia/Taipei") %>%
+  whatNeedToDo_butler_mom()
+
+ymd_hms(glue::glue("{today()} 14:00:00"),tz="Asia/Taipei") %>%
+  whatNeedToDo_butler_mom()
+
+ymd_hms(glue::glue("{today()} 18:00:00"),tz="Asia/Taipei") %>%
+  whatNeedToDo_butler_mom()
+
+ymd_hms(glue::glue("{today()+days(1)} 00:20:00"),tz="Asia/Taipei") %>%
+  whatNeedToDo_butler_mom()
+```
+
+上面的流程其實也可以用if… else if… else來做而不用switch，請用if… else if… else來創造whatNeedToDo_butler_mom。
+
+####請完成給爸爸和小明的管家機器人，whatNeedToDo_butler_dad和whatNeedToDo_butler_ming。
+
+
+##5.3.5 logical condition
+由於if, if…else, if…if else…else, 都是用來決定要不要執行某個body，所以(condition) 必需要是「一個」T/F logical value。
+
+比對答案
+```{r}
+myAnswer <- c(2,3,6)
+correctAnswer <- c(2,3,5)
+
+if(myAnswer == correctAnswer){ # 只取用第一個T/F
+  print("你答對了")
+}
+```
+
+
+R3.5以上版本可以設定
+```{r}
+Sys.setenv("_R_CHECK_LENGTH_1_CONDITION_" = "true")
+```
+
+禁止length>1的logical condition.
+
+##all, any
+
+多個T/F值：
+```{r}
+myAnswer <- c(2,3,6)
+correctAnswer <- c(2,3,5)
+
+if(all(myAnswer == correctAnswer)){ # 要全TRUE
+  print("你答對了")
+}
+```
+
+一個T/F值：
+```{r}
+if(any(myAnswer == correctAnswer)){ # 只要有一個TRUE
+  print("裡頭有數字是對的")
+}
+```
+
+
+一個T/F值：
+```{r}
+all(any(myAnswer == correctAnswer)){ # 只要有一個TRUE
+  print("裡頭有數字是對的")
+}
+```
+
+####寫一個grading(myAnswer, correctAnswer)函數可以用來比對兩者是否class及所有元素都相同，是才回傳10分，不是回傳0分。
+```{r}
+grading(myAnswer, correctAnswer) <- function(myAnswer, correctAnswer)
+{if (all(myAnswer==correctAnswer))
+  }
+```
+
+
+##&&(and)/||(or)
+有時「資訊到這裡就夠判斷情境」會產生，這時可以用&&或｜｜
+
+對答案：
+
+class, 內容都要對
+
+`&&`:more efficient, cauz R will work on the first logical relation and compare with second one first；only if the value is TRUE, R will continuing calcilating left logical relation.
+```{r}
+myAnswer <- c(1,2,3)
+correctAnswer <- factor(c(1,2,3))
+
+if(is.factor(myAnswer) && all(myAnswer==correctAnswer)){
+  print("答對了")
+  10
+} else {
+  print("答錯了")
+  0
+}-> myGrade
+myGrade
+```
+
+`&` : using only one & is also correct, but less efficient. Because R will work on each logical realation and then compare w/ both.
+```{r}
+if(is.factor(myAnswer) & all(myAnswer==correctAnswer)){
+  print("答對了")
+  10
+} else {
+  print("答錯了")
+  0
+}-> myGrade
+myGrade
+```
+
+&會計算所有relations，&&只計算到第一個出現FALSE的relation.
+
+&&用在「有一個錯就算錯」的情境。
+|會計算所有relations，||只計算到第一個出現TRUE的relation.
+
+||用在「有一個對就算對」的情境。
+在進行condition execution時，使用&&, ||會比&, |更有運算效率。
+
+condition最好少使用&或|因為兩邊relations若為logical向量長度>1，結果也會是個logical向量長度>1。
+
+####只要符合以下資格均可申請補助：
+
+年齡>=65
+
+家庭子孩數>3
+
+`||`/`|` 效率一樣：
+```{r}
+myAge <- 40
+myChildrenNumber <- 5
+
+if(myAge >=65 | myChildrenNumber >3){
+  "符合申請資格"
+} else {
+  warning("不符合申請資格")
+}
+
+if(myAge >=65 ||  myChildrenNumber >3){
+  "符合申請資格"
+} else {
+  warning("不符合申請資格")
+}
+```
+
+那改成
+`||` is more efficient
+```{r}
+myAge <- 67
+myChildrenNumber <- 5
+
+if(myAge >=65 | myChildrenNumber >3){
+  "符合申請資格"
+} else {
+  warning("不符合申請資格")
+}
+
+if(myAge >=65 ||  myChildrenNumber >3){
+  "符合申請資格"
+} else {
+  warning("不符合申請資格")
+}
+```
+
+5.3節主要在介紹「依情境執行不同body」的conditional execution，另外還有「依情境不同產生不同值」的conditional assignment。
+
+一個logical relation:
+```{r}
+x <- c(2,5,10,-21,3,8)
+ifelse(x %% 2==0, "even", "odd")
+```
+
+多個logical relations:
+```{r}
+y <- sample(40:100,20, replace=T)
+dplyr::case_when(
+  y < 60 ~ "F",
+  60<=y & y < 70 ~"D",
+  70<=y & y < 80 ~"C",
+  80<=y & y < 90 ~"B",
+  90<=y ~ "A"
+)
+```
+
+`~` : formula；RHS:right hand side/LHS: left hand side. 左邊的情境若吻合的話，就會回傳右邊。
+####將5.4.3小節中whatNeedToDo_butler_mom body裡的cut改成使用dplyr::case_when.
+
+##5.3.6 綜合練習
+消費者選擇
+效用函數：
+U(a1,a2)=a1α∗a2(1−α)−m
+ 
+a1是該商品提供之服務所帶來的愉快程度，a2是該商品操作簡便性， 
+α
+ 是個介於0與1之間的數字， 
+m
+ 則是購買此商品所要付出的金額。
+
+想像有一系列類似的App你在考慮購買且只買一次、只買一個，每個App可用一組 
+(a1,a2,m)
+ 的數字組合來代表，n個App可表示成一個集合 
+(a11,a21,m1),(a12,a22,m2),...,(a1n,a2n,mn)
+ ，消費者只選擇這些App中效用函數值最高的那個。
+
+####1.1 創造Ufun(a1, a2, m, alpha=0.5)函數，其中
+
+Arguments：
+
+a1, a2, m, alpha: 均為class numeric
+
+Value:
+
+回傳arugment values下所對應的效用函數值(class numeric)
+
+1.2 以下10個App計算並回傳它們的效用值(class numeric, length=10)
+
+
+####原始資料收回後常會依某些數值區間來分成不同組別，且描述手法均類似：
+“未滿200,000元”, “200,000～299,999元”, “300,000元及以上”
+
+“200,000以下”, “200,000～299,999元”, “超過且包含300,000元”
+
+請寫一個str_interval2cutpoints(str_interval)函數，它能萬用的讓你進行「級距組別描述」轉對應「cut函數所需cutpoints]，
+
+Arguement:
+
+str_interval: class character, 如c(“未滿200,000元”, “200,000～299,999元”, “300,000元及以上”)
+Value: 回傳值為class numeric，且用在cut(x, cutpoints)上（假設cutpoints為str_interval2cupoints回傳值），能把x依中文組距描述進行適當類別分類。
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

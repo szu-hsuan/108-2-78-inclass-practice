@@ -32,7 +32,9 @@ library(stringr)
 ```{r}
 # 先執行此行輸入學號
 readline(prompt = "請輸入你的學號") -> studentId 
+```
 
+```{r}
 # 之後才執行以下程式
 if(
   stringr::str_detect(studentId,'^[43](1[01][0-9]|9[0-9])[0-9]{5}$',negate=T) # condition: 是否輸入學號正確？
@@ -125,7 +127,7 @@ str_replace(
 print(twDate_reformat)
 
 
-lubridate::ymd(twDatwDate <-  c("民國108年12月5日","民國98年10月5日")
+lubridate::ymd(twDate <-  c("民國108年12月5日","民國98年10月5日")
 
 library(stringr)
 # 準備regex: 
@@ -236,26 +238,18 @@ convert_TaiwanDate2WesternDate <- function(twDate){
 ```
 
 ####1.寫一個check_package(pkgName)函數，它會檢查使用者是否有安裝pkgName值（class character，length=1）的套件，如果沒有就安裝
-
 ```{r}
-check_package <- function(p){
-  if(!require("p")){
-    install.packages("p")
-  }}
-```
-
-```{r}
-#1.寫一個check_package(pkgName)函數，它會檢查使用者是否有安裝pkgName值（class character，length=1）的套件，如果沒有就安裝
 check_package <- function(pkgName){
   if(!require(pkgName)){
     install.packages(pkgName)
-    }}
+  }
+  }
 ```
 
 
 ```{r}
 # 測試
-check_package("clipr")
+check_package("rio")
 check_package("SOAR")
 ```
 #####the use of "clipr"
@@ -387,16 +381,16 @@ if(condition){
 
 *} else {* must look like this
 
-#??`} return(fvalue)`an example
 ```{r}
 myfun <- function(n){
   if((n %% 2 == 1)) { #odd
     fvalue <- -(n+1)/2
   } else { fvalue <- n/2 #even
   } 
-  return(fvalue)
+  return(fvalue) #return 是另一個指令
 }
 myfun(54)
+
 ```
 
 
@@ -704,7 +698,7 @@ f(n)={n/2 if n is even
 −(n+1)/2 if n is odd
 
 ```{r}
-if (n %% ==1) {
+if (n %% 2 == 1) {
   fvalue= -(n+1)/2
 } else {
   fvalue= n/2
@@ -724,19 +718,18 @@ switch(
   conditionExpression_outcome,
   "even"={fvalue <- n/2}, # 偶數
   "odd"=fvalue <- -(n+1)/2, # 奇數；只有一行指令可省略{}
-  warning("n要整數喔")  
+  warning("n要整數喔")  # else的情境因為只有一行指令，也可不用大括號
 )
 
 print(fvalue)
 ```
 
 
-ifelse(test, yes, no)是超級好用/常用的函數：
+`ifelse`(test, yes, no)是超級好用/常用的函數：
+*數字依據是否符合邏輯條件，轉成相匹配的中文(character)*
 
 test: class logical. 測試條件的結果
-
 yes: 結果為T 時你希望的回傳值
-
 no: 結果為F 時你希望的回傳值
 
 ```{r}
@@ -746,7 +739,7 @@ ifelse(grades >= 60, "及格", "不及格")
 ```
 
 
-在R裡{...}（大括號, brace）：
+##don't understand在R裡{...}（大括號, brace）：
 
 若只有一行指令則{}符號可省略。
 
@@ -759,6 +752,7 @@ miniFun <- function(){
 miniFun()
 ```
 
+equal as :
 ```{r}
 miniFun2 <- function() lubridate::now()
 miniFun2()
@@ -767,7 +761,7 @@ miniFun2()
 
 若最後一個被執行的指令會產生print在螢幕的效果，則可以用{...}->或<-{...}將這print的值存出來。
 
-
+`**` :次方＝＾
 ```{r}
 result <- 
   {
@@ -813,7 +807,7 @@ print(outcome2)
 ```
 
 
-##cut：連續轉類別
+##cut：連續轉類別, based on the point you give
 可適當使用cut()函數將與「連續型」數值變數有關的condition轉成需要的字串表示，
 
 ```{r}
@@ -821,7 +815,9 @@ cut(x, c(a,b,c))
 ```
 
 會將x分成(a,b], (b,c], 及NA 三大類。
-
+a<x<=b, b<x<=c
+( ): 不包含
+[ ]: 包含
 x只要type是integer, double的資料都可使用，所以日期，時間都可以
 
 (a,b]在數學上是a< . <=b，所以左側a值是「不包含」在裡面的
@@ -832,7 +828,12 @@ x只要type是integer, double的資料都可使用，所以日期，時間都可
 a <- c(1,2,3)
 cut(a, c(1,2,3))
 ```
-
+##why is double
+double 是小數點
+```{r}
+typeof(a)
+```
+*要會自己換算成 x<y<=z*
 數字成績轉英文字母成績 成績等級：
 
 >=90: A 同時螢幕出現“好棒棒” （89<…<=100）
@@ -841,10 +842,13 @@ cut(a, c(1,2,3))
 
 70-79：C 同時螢幕出現“棒” （69<…<=79）
 
-70以下：F 同時螢幕出現"-_-" (-1<…<=69)
+70以下：F 同時螢幕出現"-_-" (-1<…<=69)  不可以寫0（cauz score is likely to be 0)
 
 ```{r}
 grade <- sample(1:100, 10, replace=T)
+
+grade
+cut(grade,c(-1,69,79,89,100))
 
 grade %>%
   cut(c(-1,69,79,89,100)) -> grade
@@ -871,7 +875,8 @@ switch(
 ) -> letterGrade # 有回存時要螢幕印出的訊息一定要加print
 ```
 
-####寫一個compute_letterGrade(myGrade)函數, 可以依myGrade不同而回傳letterGrade且出現要求文字。
+寫一個compute_letterGrade(myGrade)函數, 可以依myGrade不同而回傳letterGrade且出現要求文字。
+*add print()*
 
 管家機器人:
 
@@ -888,6 +893,11 @@ switch(
 ```{r}
 nowtime <- glue::glue("{today()} 18:00:00") %>% ymd_hms(tz="Asia/Taipei")
 
+# check class & type
+class(nowtime)
+typeof(nowtime)
+
+
 library(lubridate)
 library(glue)
 
@@ -900,7 +910,7 @@ cutpoints <-
     glue("{today()} 19:00:00"),
     glue("{today()} 23:30:00"),
     glue("{today()+days(1)} 01:00:00")
-  )
+  ) # add 1 day can't type "+1" only
 cutpoints %>%
   ymd_hms(tz="Asia/Taipei") -> cutpoints
 
